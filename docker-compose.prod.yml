@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  megatron:
+    restart: always
+    image: megatron
+    build: ${PWD}/app/
+    command: bash -c "./start.sh"
+    volumes:
+      - ${PWD}/app:/usr/src/app
+    env_file:
+      - ${PWD}/app/django-variables.env
+    environment:
+      - PRODUCTION='true'
+
+  megatron-nginx:
+    restart: always
+    image: nginx
+    build: ${PWD}/nginx/
+    command: /bin/bash -c "envsubst '$${DNS_SERVER},$${DJANGO_SERVICE_DNS},$${DJANGO_SERVICE_PORT}' < /etc/nginx/conf.d/megatron.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    volumes:
+      - ${PWD}/nginx/conf:/etc/nginx/conf.d
+    ports:
+      - "8002:8002"
+    environment:
+      - DJANGO_SERVICE_DNS=megatron
+      - DJANGO_SERVICE_PORT=8002
+      - DNS_SERVER=127.0.0.11
