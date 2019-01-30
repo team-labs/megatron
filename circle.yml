@@ -1,0 +1,64 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/app
+    docker:
+      - image: circleci/python:3.6.1
+      - image: postgres@sha256:295a08ddd9efa1612c46033f0b96c3976f80f49c7ce29e05916b0af557806117
+    steps:
+      - checkout
+      - run:
+          name: Install Deploy Dependencies
+          command: |
+            sudo pip install awscli pipenv
+            curl -sL https://sentry.io/get-cli/ | bash
+      - restore_cache:
+          keys:
+            - cache-{{ checksum "app/Pipfile.lock" }}
+            - cache
+      - run:
+          name: Install Python Dependencies
+          command: |
+            cd app
+            pipenv sync --dev
+      - save_cache:
+          key: cache-{{ checksum "app/Pipfile.lock" }}
+          paths:
+            - ~/.local
+            - ~/.cache
+      - run:
+            name: mypy
+            command: |
+                cd app
+                pipenv run mypy --ignore-missing-imports --follow-imports=skip .
+      - run:
+          name: Pytest
+          command: |
+            # pytest doesn't like to be run from outside app
+            cd app
+            set -o allexport
+            source django-variables.env.default
+            export DATABASE_URL=postgres://postgres:postgres@localhost:5432/megatron
+            set +o allexport
+            pipenv run pytest --create-db --ignore=venv -p no:warnings .
+      - setup_remote_docker:
+          reusable: true
+          exclusive: false
+      - run:
+          name: Build Containers
+          command: |
+            docker build -t megatron ./app
+              docker build -t megatron-nginx ./nginx
+      - run:
+          name: Deploy master
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./deploy.sh ${CIRCLE_SHA1} production
+            fi
+      - run:
+          name: Deploy develop
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              ./deploy.sh ${CIRCLE_SHA1} staging
+            fi
+

@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+   megatron:
+      restart: always
+      build: ${PWD}/app/
+      env_file:
+        - ${PWD}/app/django-variables.env
+      environment:
+         PRODUCTION: 'false'
+      command: bash -c "echo $PRODUCTION && ./start.sh"
+      volumes:
+        - ${PWD}/app:/usr/src/app
+      ports:
+        - "8002:8002"

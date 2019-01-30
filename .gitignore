@@ -1,0 +1,19 @@
+db.sqlite3
+.cache
+.DS_Store
+.coverage
+venv
+.idea
+__pycache__
+.#*
+.pytest_cache
+.vscode
+.env
+.vscode/*
+.mypy*
+*celerybeat*
+
+# Local Environment
+django-variables.env
+django-variables.env.local
+
