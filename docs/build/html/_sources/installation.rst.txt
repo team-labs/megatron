@@ -1,0 +1,19 @@
+1. Clone repo and enter repo
+	```
+	git clone https://github.com/team-labs/megatron
+	cd megatron
+	```
+1. Set up an app for Megatron
+
+	Go to https://api.slack.com/apps and setup an app for Megatron.
+
+1. Setup your environment
+
+	In your project, edit ``
+2. Run Docker compose
+	```
+	docker-compose up
+	```
+
+##### Point your browser at `localhost:8002` to test that Megatron is running.
+
