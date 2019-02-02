@@ -10,6 +10,11 @@ Welcome to Megatron's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   quickstart
+   megatron_commands
+   slack_app_configuration
+   environment_setup
+
 
 
 Indices and tables
