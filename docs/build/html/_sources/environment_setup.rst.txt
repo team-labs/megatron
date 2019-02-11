@@ -6,7 +6,6 @@ Environment Setup
 PYTHONUNBUFFERED
 	Always "1". Sends logs and print statements directly to the console.
 
-
 DJANGO_PORT
 	Port that Django will use to listen for incoming requests. Should generally
 	not be changed from 8002.
@@ -16,7 +15,8 @@ HOSTNAME
 	is suggested.
 
 DATABASE_URL
-	URL of the database on which to store Megatron data. Don't use the same database
+	URL of the database (as specified here: https://github.com/kenneth-reitz/dj-database-url)
+	on which to store Megatron data. Don't use the same database
 	as another Django app.
 
 REDIS_URL
@@ -33,8 +33,8 @@ MEGATRON_APP_MODE
 	``megatron-dev`` for development environments. ``megatron-production`` for production.
 
 
-TODO: I'm pretty sure there's a way to make this work through Slack alone without
-the need for this AWS stopover.
+We're using S3 as a stopover here but this can be done through Slack as well. Great
+spot for a PR.
 
 S3_AWS_ACCESS_KEY_ID
 	Access key for your AWS instance. Megatron uses AWS S3 to store images it
