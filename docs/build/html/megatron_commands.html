@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Slack App Configuration" href="slack_app_configuration.html" />
-    <link rel="prev" title="Quickstart" href="quickstart.html" />
+    <link rel="prev" title="Megatron" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -36,7 +36,7 @@
             
   <div class="section" id="megatron-commands">
 <h1>Megatron Commands<a class="headerlink" href="#megatron-commands" title="Permalink to this headline">¶</a></h1>
-<p>Megatron will ocasionally send commands to your app at
+<p>Megatron will occasionally send commands to your app at
 /slack_command. Your app will need to take action and send an
 http response when it receives one of these commands.</p>
 <p>The command payload is an http request with a JSON body. The payload
@@ -61,9 +61,9 @@ bot to respond to them.</p>
 <p class="last"><strong>Expected response</strong>: 200</p>
 </dd>
 <dt>suggest users</dt>
-<dd><p class="first"><strong>Expected action</strong>: Create a list of platform users based on a
+<dd><p class="first"><strong>Expected action</strong>: Return a list of platform users based on a
 fuzzy match of the included username.</p>
-<p class="last"><strong>Expected response</strong>: 200 {}</p>
+<p class="last"><strong>Expected response</strong>: 200 with JSON body</p>
 </dd>
 </dl>
 </div>
@@ -87,16 +87,16 @@ fuzzy match of the included username.</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Megatron Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack_app_configuration.html">Slack App Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environment_setup.html">Environment Setup</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="quickstart.html" title="previous chapter">Quickstart</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">Megatron</a></li>
       <li>Next: <a href="slack_app_configuration.html" title="next chapter">Slack App Configuration</a></li>
   </ul></li>
 </ul>
