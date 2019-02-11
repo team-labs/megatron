@@ -45,7 +45,8 @@ not be changed from 8002.</dd>
 <dd>The root url that this instance of Django will run at. Using <a class="reference external" href="https://ngrok.com/">ngrok</a>
 is suggested.</dd>
 <dt>DATABASE_URL</dt>
-<dd>URL of the database on which to store Megatron data. Don’t use the same database
+<dd>URL of the database (as specified here: <a class="reference external" href="https://github.com/kenneth-reitz/dj-database-url">https://github.com/kenneth-reitz/dj-database-url</a>)
+on which to store Megatron data. Don’t use the same database
 as another Django app.</dd>
 <dt>REDIS_URL</dt>
 <dd>Megatron uses celery to queue tasks through redis.</dd>
@@ -57,8 +58,8 @@ needed.</dd>
 <dt>MEGATRON_APP_MODE</dt>
 <dd><code class="docutils literal notranslate"><span class="pre">megatron-dev</span></code> for development environments. <code class="docutils literal notranslate"><span class="pre">megatron-production</span></code> for production.</dd>
 </dl>
-<p>TODO: I’m pretty sure there’s a way to make this work through Slack alone without
-the need for this AWS stopover.</p>
+<p>We’re using S3 as a stopover here but this can be done through Slack as well. Great
+spot for a PR.</p>
 <dl class="docutils">
 <dt>S3_AWS_ACCESS_KEY_ID</dt>
 <dd>Access key for your AWS instance. Megatron uses AWS S3 to store images it
@@ -89,7 +90,6 @@ passes from one messaging workspace to another.</dd>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="megatron_commands.html">Megatron Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack_app_configuration.html">Slack App Configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Environment Setup</a></li>
