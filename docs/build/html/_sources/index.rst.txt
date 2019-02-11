@@ -48,6 +48,4 @@ local environment as fast as possible. To start:
 
 #. Run Docker compose::
 
-	docker-compose up
-
 **Finally, point your browser at "localhost:8002" to test that Megatron is running.**
