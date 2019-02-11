@@ -33,8 +33,8 @@ MEGATRON_APP_MODE
 	``megatron-dev`` for development environments. ``megatron-production`` for production.
 
 
-TODO: I'm pretty sure there's a way to make this work through Slack alone without
-the need for this AWS stopover.
+We're using S3 as a stopover here but this can be done through Slack as well. Great
+spot for a PR.
 
 S3_AWS_ACCESS_KEY_ID
 	Access key for your AWS instance. Megatron uses AWS S3 to store images it
