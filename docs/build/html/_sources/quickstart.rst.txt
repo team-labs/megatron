@@ -1,27 +1,3 @@
-.. Megatron documentation master file, created by
-   sphinx-quickstart on Tue Jan 29 17:56:31 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Megatron
-====================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   megatron_commands
-   slack_app_configuration
-   environment_setup
-
-Requirements
-===================================
-Before you setup Megatron you should make sure you have:
-
-1. A database instance running on your local machine
-2. | A redis instance running on your local machine
-   | (Any cache should work here but only redis is tested)
-
 Quickstart
 ====================================
 The objective of this document is to get Megatron up and running in your
@@ -35,7 +11,7 @@ local environment as fast as possible. To start:
 #. Set up an app for Megatron
 
 	This step depends on the app or apps you want to use with
-	Megatron:
+	Megatron
 
 	* Slack: :ref:`megatron_slack_configuration`
 
@@ -48,4 +24,7 @@ local environment as fast as possible. To start:
 
 #. Run Docker compose::
 
+	docker-compose up
+
 **Finally, point your browser at "localhost:8002" to test that Megatron is running.**
+

@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Slack App Configuration &#8212; Megatron 1/30/19 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Environment Setup" href="environment_setup.html" />
+    <link rel="prev" title="Megatron Commands" href="megatron_commands.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="slack-app-configuration">
+<span id="megatron-slack-configuration"></span><h1>Slack App Configuration<a class="headerlink" href="#slack-app-configuration" title="Permalink to this headline">¶</a></h1>
+<p>To use Megatron on Slack, you’ll need to set up and configure a
+custom Slack app.</p>
+<ol class="arabic">
+<li><p class="first">Navigate to <a class="reference external" href="https://api.slack.com/apps">https://api.slack.com/apps</a> and click “Create New App”</p>
+</li>
+<li><p class="first">Set up app basics</p>
+<blockquote>
+<div><ul class="simple">
+<li>Click “Basic Information” on the left side of the screen</li>
+<li>Save the “Verification Token” you will need it when setting up your environmental variables</li>
+<li>Enter whatever you’d like under “Display Information”</li>
+<li>Click “Save Changes”</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Enable “Interactive Components” so that your app can use buttons and drop-downs</p>
+<blockquote>
+<div><ul class="simple">
+<li>Click “Interactive Components” on the left side of the screen</li>
+<li>Change the switch in the top-right to “On”</li>
+<li>Under “Request URL” enter <code class="docutils literal notranslate"><span class="pre">&lt;your_app&gt;/megatron/slack/interactive-message/</span></code></li>
+<li>Click “Save Changes”</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Enable “Slash Commands” so that your app can use…slash commands</p>
+<blockquote>
+<div><ul class="simple">
+<li>Click “Slash Commands” on the left side of the screen</li>
+<li>Click “Create New Command”</li>
+<li>Provide whatever name and description you want for the command (We like “/megatron”!)</li>
+<li>Next to “Request URL” enter <code class="docutils literal notranslate"><span class="pre">&lt;your_app&gt;/megatron/slack/slash-command/</span></code></li>
+<li>Click “Save Changes”</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add oAuth Scopes</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Click “OAuth &amp; Permissions”</p>
+</li>
+<li><p class="first">Under “Scopes” add the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">channels:history</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">channels:read</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">channels:write</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">channels:write:bot</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">commands</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">users:read</span></code></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Enable “Event Subscriptions” so that your app is notified of new messages in Megatron channels</p>
+<blockquote>
+<div><ul class="simple">
+<li>Click “Event Subscriptions” on the left side of the screen</li>
+<li>Change the switch in the top-right to “On”</li>
+<li>Under “Request URL” enter <code class="docutils literal notranslate"><span class="pre">&lt;your_app&gt;/megatron/slack/interactive-message/</span></code></li>
+<li>Under “Subscribe to Workspace Events” search for and add <code class="docutils literal notranslate"><span class="pre">message.channels</span></code></li>
+<li>Click “Save Changes”</li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+<p><strong>You’re done!</strong></p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Megatron</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="megatron_commands.html">Megatron Commands</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Slack App Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environment_setup.html">Environment Setup</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="megatron_commands.html" title="previous chapter">Megatron Commands</a></li>
+      <li>Next: <a href="environment_setup.html" title="next chapter">Environment Setup</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Teamlabs Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/slack_app_configuration.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

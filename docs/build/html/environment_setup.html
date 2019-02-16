@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Megatron Commands &#8212; Megatron 1/30/19 documentation</title>
+    <title>Environment Setup &#8212; Megatron 1/30/19 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Slack App Configuration" href="slack_app_configuration.html" />
-    <link rel="prev" title="Megatron" href="index.html" />
+    <link rel="prev" title="Slack App Configuration" href="slack_app_configuration.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,37 +33,41 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="megatron-commands">
-<h1>Megatron Commands<a class="headerlink" href="#megatron-commands" title="Permalink to this headline">¶</a></h1>
-<p>Megatron will occasionally send commands to your app at
-/slack_command. Your app will need to take action and send an
-http response when it receives one of these commands.</p>
-<p>The command payload is an http request with a JSON body. The payload
-looks like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-        <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;command-name&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;user_id&#39;</span><span class="p">:</span> <span class="s1">&#39;U12345&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;megatron_verification_token&#39;</span><span class="p">:</span> <span class="s1">&#39;sometoken&#39;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The possible commands are:</p>
+  <div class="section" id="environment-setup">
+<span id="id1"></span><h1>Environment Setup<a class="headerlink" href="#environment-setup" title="Permalink to this headline">¶</a></h1>
 <dl class="docutils">
-<dt>pause</dt>
-<dd><p class="first"><strong>Expected action</strong>: Mark the <cite>user_id</cite> user as paused. Prevent the
-bot from responding to them.</p>
-<p class="last"><strong>Expected response</strong>: 200</p>
-</dd>
-<dt>unpause</dt>
-<dd><p class="first"><strong>Expected action</strong>: Mark the <cite>user_id</cite> user as unpaused. All the
-bot to respond to them.</p>
-<p class="last"><strong>Expected response</strong>: 200</p>
-</dd>
-<dt>suggest users</dt>
-<dd><p class="first"><strong>Expected action</strong>: Return a list of platform users based on a
-fuzzy match of the included username.</p>
-<p class="last"><strong>Expected response</strong>: 200 with JSON body</p>
-</dd>
+<dt>PYTHONUNBUFFERED</dt>
+<dd>Always “1”. Sends logs and print statements directly to the console.</dd>
+<dt>DJANGO_PORT</dt>
+<dd>Port that Django will use to listen for incoming requests. Should generally
+not be changed from 8002.</dd>
+<dt>HOSTNAME</dt>
+<dd>The root url that this instance of Django will run at. Using <a class="reference external" href="https://ngrok.com/">ngrok</a>
+is suggested.</dd>
+<dt>DATABASE_URL</dt>
+<dd>URL of the database (as specified here: <a class="reference external" href="https://github.com/kenneth-reitz/dj-database-url">https://github.com/kenneth-reitz/dj-database-url</a>)
+on which to store Megatron data. Don’t use the same database
+as another Django app.</dd>
+<dt>REDIS_URL</dt>
+<dd>Megatron uses celery to queue tasks through redis.</dd>
+<dt>CHANNEL_PREFIX</dt>
+<dd>The prefix for channels that Megatron creates to talk to users.</dd>
+<dt>MEGATRON_VERIFICATION_TOKEN</dt>
+<dd>Verification token sent with Slack requests. Get from your Megatron Slack app if
+needed.</dd>
+<dt>MEGATRON_APP_MODE</dt>
+<dd><code class="docutils literal notranslate"><span class="pre">megatron-dev</span></code> for development environments. <code class="docutils literal notranslate"><span class="pre">megatron-production</span></code> for production.</dd>
+</dl>
+<p><strong>We’re using S3 as a stopover here but this can be done through Slack as well. Great
+spot for a PR.</strong></p>
+<dl class="docutils">
+<dt>S3_AWS_ACCESS_KEY_ID</dt>
+<dd>Access key for your AWS instance. Megatron uses AWS S3 to store images it
+passes from one messaging workspace to another.</dd>
+<dt>S3_AWS_SECRET_ACCESS_KEY</dt>
+<dd>Ditto but this one’s secret.</dd>
+<dt>AWS_S3_BUCKET</dt>
+<dd>Name of the bucket to store images that Megatron processes</dd>
 </dl>
 </div>
 
@@ -87,17 +90,16 @@ fuzzy match of the included username.</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Megatron Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="megatron_commands.html">Megatron Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack_app_configuration.html">Slack App Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="environment_setup.html">Environment Setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Environment Setup</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Megatron</a></li>
-      <li>Next: <a href="slack_app_configuration.html" title="next chapter">Slack App Configuration</a></li>
+      <li>Previous: <a href="slack_app_configuration.html" title="previous chapter">Slack App Configuration</a></li>
   </ul></li>
 </ul>
 </div>
@@ -133,7 +135,7 @@ fuzzy match of the included username.</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/megatron_commands.rst.txt"
+      <a href="_sources/environment_setup.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
