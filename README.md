@@ -25,19 +25,11 @@ Megatron is a fully featured Django app and generally follows the microservice
 pattern. Getting up and running in a production environment is highly dependent
 on your existing architecture.
 
-That being said, thanks to Docker, getting running with megatron locally
-is essentially a one-step process. Try this: 
-1. Clone repo and enter repo
-	```
-	git clone https://github.com/team-labs/megatron
-	cd megatron
-	```
-2. Run Docker compose
-	```
-	docker-compose up
-	```
+That being said, thanks to the magic of [Docker](https://www.docker.com/) and 
+[Docker Compose](https://docs.docker.com/compose/), getting running with megatron locally
+is a pretty painless process.
 
-##### Point your browser at `localhost:8002` to test that Megatron is running.
+[Click here for local setup instructions!](www.google.com)
 
 Contribute
 ----------
