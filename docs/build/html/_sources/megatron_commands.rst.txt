@@ -1,7 +1,7 @@
 ==================
 Megatron Commands
 ==================
-Megatron will ocasionally send commands to your app at
+Megatron will occasionally send commands to your app at
 /slack_command. Your app will need to take action and send an
 http response when it receives one of these commands.
 
@@ -29,7 +29,7 @@ unpause
 	**Expected response**: 200
 
 suggest users
-	**Expected action**: Create a list of platform users based on a
+	**Expected action**: Return a list of platform users based on a
 	fuzzy match of the included username.
 
-	**Expected response**: 200 {}
+	**Expected response**: 200 with JSON body
