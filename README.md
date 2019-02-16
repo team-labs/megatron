@@ -9,7 +9,9 @@ a live DM channel between the your chatbot and a customer. Your're able to 'beco
 the bot' through Megatron, sending responses directly from your existing chatbot. 
 Best of all, this happens from within your existing app. **There's nothing 
 more your customers need to install or authorize, and no external tools for you.**
+
 ---
+
 Here's how a quick example of how it works:
 1. Phil, a customer, gets stuck trying to talk to your bot
 2. Jane, your customer service rep at, opens a channel on your team. This 
