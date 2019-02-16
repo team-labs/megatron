@@ -2,17 +2,14 @@ Megatron
 ========
 ![](https://cdn-images-1.medium.com/max/1600/1*P50kQIe-ahc05ZPTGTSdvQ.png "Logo Title Text 1")
 
-<p style="text-align: center;"> Chatbots in disguise!</p>
+<p align="center"> Chatbots in disguise!</p>
 
 Megatron allows engineers, customer-service, and occasionally CEOs, to peer into 
 a live DM channel between the your chatbot and a customer. Your're able to 'become 
 the bot' through Megatron, sending responses directly from your existing chatbot. 
 Best of all, this happens from within your existing app. **There's nothing 
 more your customers need to install or authorize, and no external tools for you.**
-
-Reference-style: 
-![alt text][logo]
-
+---
 Here's how a quick example of how it works:
 1. Phil, a customer, gets stuck trying to talk to your bot
 2. Jane, your customer service rep at, opens a channel on your team. This 
