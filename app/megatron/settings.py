@@ -45,13 +45,6 @@ ALLOWED_HOSTS = {
     'localhost',
 }
 
-# ==================== Logging ========================
-if MEGATRON_APP_MODE != 'megatron-dev':
-
-        environment=MEGATRON_APP_MODE,
-        integrations=[DjangoIntegration(), CeleryIntegration()]
-    )
-
 
 
 
