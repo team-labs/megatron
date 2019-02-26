@@ -1,8 +1,5 @@
 import json
 import logging
-import hmac
-import hashlib
-import urllib
 
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -12,7 +9,7 @@ from django.db.utils import IntegrityError
 from kombu.utils import json as kombu_json
 from datetime import datetime
 
-from megatron.authentication import validate_slack_token
+from megatron.authentication import validate_slack_signed_secret
 from megatron.models import (
     MegatronChannel, PlatformUser, MegatronUser, MegatronIntegration,
     CustomerWorkspace, MegatronMessage
@@ -31,20 +28,8 @@ BOTNAME = "Teampay"
 LOGGER = logging.getLogger(__name__)
 
 
-def verify_slack_response(request: HttpResponse) -> bool:
-    signing_key = settings.SLACK_SIGNING_KEY.encode('utf-8')
-    slack_timestamp = request.META['HTTP_X_SLACK_REQUEST_TIMESTAMP']
-    body = request.body.decode('utf-8')
-    basestring = f"v0:{slack_timestamp}:{body}".encode('utf-8')
-    digest = "v0=" + hmac.new(signing_key, msg=basestring, digestmod=hashlib.sha256).hexdigest()
-    if hmac.compare_digest(request.META['HTTP_X_SLACK_SIGNATURE'], digest):
-        return True
-    return False
-
-
 @catch_megatron_errors
 def incoming(msg: dict, channel: MegatronChannel):
-    from megatron.services import WorkspaceService
     platform_user = PlatformUser.objects.get(platform_id=msg['user'])
     workspace_connection = WorkspaceService(channel.megatron_integration).get_connection(
         as_user=False)
@@ -67,7 +52,6 @@ def incoming(msg: dict, channel: MegatronChannel):
 
 @catch_megatron_errors
 def outgoing(msg: dict, channel: MegatronChannel):
-    from megatron.services import WorkspaceService
     cleaned_msg = remove_sensitive_data(msg)
     msg = {
         'username': BOTNAME,
@@ -85,7 +69,7 @@ def outgoing(msg: dict, channel: MegatronChannel):
 
 
 @csrf_exempt
-@validate_slack_token
+@validate_slack_signed_secret
 def slash_command(request):
     data = request.POST
     response_channel = data['channel_id']
@@ -120,10 +104,8 @@ def slash_command(request):
 
 
 @csrf_exempt
+@validate_slack_signed_secret
 def interactive_message(request):
-    if not verify_slack_response(request):
-        return NOT_AUTHORIZED_RESPONSE
-
     payload = json.loads(request.POST['payload'])
     megatron_user = MegatronIntegration.objects.get(
         platform_id=payload['team']['id']).megatron_user
@@ -194,10 +176,8 @@ def interactive_message(request):
 
 
 @csrf_exempt
+@validate_slack_signed_secret
 def event(request):
-    if not verify_slack_response(request):
-        return NOT_AUTHORIZED_RESPONSE
-
     data = json.loads(request.body)
 
     if data.get('type') == 'url_verification':
