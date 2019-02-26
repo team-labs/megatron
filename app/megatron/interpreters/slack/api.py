@@ -1,6 +1,10 @@
 import json
 import logging
+import hmac
+import hashlib
+import urllib
 
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.core.cache import cache
@@ -14,7 +18,7 @@ from megatron.models import (
     CustomerWorkspace, MegatronMessage
 )
 from megatron.connections.actions import Action, ActionType
-from megatron.responses import MegatronResponse
+from megatron.responses import MegatronResponse, NOT_AUTHORIZED_RESPONSE
 from megatron.errors import catch_megatron_errors
 from megatron.utils import remove_sensitive_data
 from megatron.commands.commands import Command
@@ -25,6 +29,17 @@ from megatron.interpreters.slack import formatting
 
 BOTNAME = "Teampay"
 LOGGER = logging.getLogger(__name__)
+
+
+def verify_slack_response(request: HttpResponse) -> bool:
+    signing_key = settings.SLACK_SIGNING_KEY.encode('utf-8')
+    slack_timestamp = request.META['HTTP_X_SLACK_REQUEST_TIMESTAMP']
+    body = request.body.decode('utf-8')
+    basestring = f"v0:{slack_timestamp}:{body}".encode('utf-8')
+    digest = "v0=" + hmac.new(signing_key, msg=basestring, digestmod=hashlib.sha256).hexdigest()
+    if hmac.compare_digest(request.META['HTTP_X_SLACK_SIGNATURE'], digest):
+        return True
+    return False
 
 
 @catch_megatron_errors
@@ -106,6 +121,9 @@ def slash_command(request):
 
 @csrf_exempt
 def interactive_message(request):
+    if not verify_slack_response(request):
+        return NOT_AUTHORIZED_RESPONSE
+
     payload = json.loads(request.POST['payload'])
     megatron_user = MegatronIntegration.objects.get(
         platform_id=payload['team']['id']).megatron_user
@@ -177,6 +195,9 @@ def interactive_message(request):
 
 @csrf_exempt
 def event(request):
+    if not verify_slack_response(request):
+        return NOT_AUTHORIZED_RESPONSE
+
     data = json.loads(request.body)
 
     if data.get('type') == 'url_verification':

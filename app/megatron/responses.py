@@ -12,3 +12,4 @@ class MegatronResponse(HttpResponse):
 
 
 OK_RESPONSE = MegatronResponse({'ok': True}, 200)
+NOT_AUTHORIZED_RESPONSE = MegatronResponse({'ok': True}, 401)

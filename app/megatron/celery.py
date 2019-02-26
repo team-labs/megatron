@@ -10,7 +10,7 @@ REDIS_URL = os.environ['REDIS_URL']
 class Config:
     broker_url = REDIS_URL
     result_backend = REDIS_URL
-    accept_content = ['pickle', 'application/json']
+    accept_content = ['application/json']
     task_serializer = 'json'
     result_serializer = 'json'
     enable_utc = True

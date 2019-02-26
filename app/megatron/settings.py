@@ -45,8 +45,8 @@ ALLOWED_HOSTS = {
     'localhost',
 }
 
-
-
+import dj_database_url  # noqa
+DATABASES = {'default': dj_database_url.config()}
 
 # ==================== AWS ========================
 AWS_ACCESS_KEY = os.environ['S3_AWS_ACCESS_KEY_ID']
@@ -62,3 +62,5 @@ NOTIFICATIONS_CHANNELS = {
     NotificationChannels.customer_service: os.environ.get('CUSTOMER_SERVICE_CHANNEL', '#customer-service'),
     NotificationChannels.security: os.environ.get('SECURITY_CHANNEL', '#security')
 }
+
+SLACK_SIGNING_KEY = os.environ['SLACK_SIGNING_KEY']
