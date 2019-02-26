@@ -94,6 +94,7 @@ def test(request):
 
 
 @api_view(http_method_names=['POST'])
+@permission_classes((IsAuthenticated, ))
 def notify_user(request) -> MegatronResponse:
     msg = request.data['message']
     user_id = request.data['user_id']
