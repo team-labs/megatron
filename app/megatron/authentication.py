@@ -20,17 +20,6 @@ def get_organization_token(organization) -> str:
     return token
 
 
-def validate_slack_token(func):
-    def wrapper(request):
-        data = request.POST
-        verification_token = data['token']
-        if verification_token == VERIFICATION_TOKEN:
-            return func(request)
-        else:
-            return HttpResponse("Incorrect validation token.", status=401)
-    return wrapper
-
-
 def verify_slack_response(request: HttpResponse) -> bool:
     signing_key = settings.SLACK_SIGNING_KEY.encode('utf-8')
     slack_timestamp = request.META['HTTP_X_SLACK_REQUEST_TIMESTAMP']
