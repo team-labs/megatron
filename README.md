@@ -42,9 +42,7 @@ Thanks to the magic of [Docker](https://www.docker.com/) and
 [Docker Compose](https://docs.docker.com/compose/), getting running with megatron locally
 is a pretty painless process.
 
-TODO: Link to read the docs once this repo is public
-
-[**Click here for local setup instructions!**](www.google.com)
+[**Click here for local setup instructions!**](https://teampay-megatron.readthedocs.io/en/latest/)
 
 Megatron is a fully featured Django app and generally follows the microservice
 pattern. Getting up and running in a production environment is highly dependent
