@@ -2,7 +2,7 @@ import json
 import logging
 
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.core.cache import cache
 from django.db.utils import IntegrityError
 from kombu.utils import json as kombu_json
@@ -85,8 +85,8 @@ def slash_command(request):
         response_url=response_url
     )
 
-    megatron_user = MegatronUser.objects.get(
-        verification_token=data['token'])
+    # TODO: There is only ever one megatron user, remove it
+    megatron_user = MegatronUser.objects.first()
 
     args = data['text'].split(' ')
     command_str = args[0]

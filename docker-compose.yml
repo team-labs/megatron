@@ -1,21 +1,34 @@
 version: '3'
 
 services:
-   megatron-celery:
-      build: ${PWD}/app/
-      image: megatron-celery
-      user: megatron-celery
-      command: /bin/bash -c "export WORKER_MODE=celery && celery -A megatron worker -Q megatron -l info -E"
-      volumes:
-        - ${PWD}/app:/usr/src/app
-      env_file:
-        - ${PWD}/app/django-variables.env
+  megatron:
+    restart: always
+    build: ${PWD}/app/
+    environment:
+      PRODUCTION: 'false'
+    command: bash -c "echo $PRODUCTION && ./start.sh"
+    volumes:
+      - ${PWD}/app:/usr/src/app
+    ports:
+      - "8002:8002"
+    env_file:
+      - ${PWD}/app/django-variables.env
 
-   megatron-celery-beat:
-      build: ${PWD}/app/
-      image: megatron-celery-beat
-      command: /bin/bash -c "export WORKER_MODE=celery && celery -A megatron beat -l info -S django"
-      volumes:
-        - ${PWD}/app:/usr/src/app
-      env_file:
-        - ${PWD}/app/django-variables.env
+  megatron-celery:
+     build: ${PWD}/app/
+     image: megatron-celery
+     user: megatron-celery
+     command: /bin/bash -c "export WORKER_MODE=celery && celery -A megatron worker -Q megatron -l info -E"
+     volumes:
+       - ${PWD}/app:/usr/src/app
+     env_file:
+       - ${PWD}/app/django-variables.env
+
+  megatron-celery-beat:
+     build: ${PWD}/app/
+     image: megatron-celery-beat
+     command: /bin/bash -c "export WORKER_MODE=celery && celery -A megatron beat -l info -S django"
+     volumes:
+       - ${PWD}/app:/usr/src/app
+     env_file:
+       - ${PWD}/app/django-variables.env

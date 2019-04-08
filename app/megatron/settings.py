@@ -48,8 +48,9 @@ ALLOWED_HOSTS = {
 }
 
 # ==================== Logging ========================
+FRONT_TOKEN = None
 if MEGATRON_APP_MODE != 'megatron-dev':
-FRONT_TOKEN = os.environ.get('FRONT_TOKEN')
+    FRONT_TOKEN = os.environ.get('FRONT_TOKEN')
 
 import dj_database_url  # noqa
 DATABASES = {'default': dj_database_url.config()}
