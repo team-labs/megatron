@@ -18,3 +18,6 @@ export MEGATRON_APP_MODE=`aws ssm get-parameters --names megatron.megatron-app-m
 export S3_AWS_ACCESS_KEY_ID=`aws ssm get-parameters --names django.aws-access-key-id --with-decryption --region $EC2_REGION | python3 -c "import sys, json; print(json.load(sys.stdin)['Parameters'][0]['Value'])"`
 export S3_AWS_SECRET_ACCESS_KEY=`aws ssm get-parameters --names django.aws-secret-access-key --with-decryption --region $EC2_REGION | python3 -c "import sys, json; print(json.load(sys.stdin)['Parameters'][0]['Value'])"`
 export AWS_S3_BUCKET=`aws ssm get-parameters --names django.aws-s3-bucket --no-with-decryption --region $EC2_REGION | python3 -c "import sys, json; print(json.load(sys.stdin)['Parameters'][0]['Value'])"`
+
+export FRONT_TOKEN=`aws ssm get-parameters --names django.front-token --no-with-decryption --region $EC2_REGION | python3 -c "import sys, json; print(json.load(sys.stdin)['Parameters'][0]['Value'])"`
+export FRONT_CHANNEL=`aws ssm get-parameters --names django.front-channel --no-with-decryption --region $EC2_REGION | python3 -c "import sys, json; print(json.load(sys.stdin)['Parameters'][0]['Value'])"`

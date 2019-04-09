@@ -10,7 +10,8 @@ Megatron
    :maxdepth: 2
    :caption: Contents:
 
-   megatron_commands
+   concepts
+   app_commands
    slack_app_configuration
    environment_setup
 
