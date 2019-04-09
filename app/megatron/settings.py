@@ -49,6 +49,7 @@ ALLOWED_HOSTS = {
 
 # ==================== Logging ========================
 FRONT_TOKEN = None
+FRONT_CHANNEL = None
 if MEGATRON_APP_MODE != 'megatron-dev':
     FRONT_TOKEN = os.environ.get('FRONT_TOKEN')
 

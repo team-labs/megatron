@@ -10,7 +10,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class FrontConnection:
-    front_incoming_url = 'https://api2.frontapp.com/channels/cha_jt8f/incoming_messages'
+    front_incoming_url = f'https://api2.frontapp.com/channels/{settings.FRONT_CHANNEL}/incoming_messages'
     default_front_token = settings.FRONT_TOKEN
 
     def __init__(self, token=default_front_token):
