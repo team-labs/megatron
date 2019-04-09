@@ -23,11 +23,11 @@ S3FoldersNames = {
 }
 
 
-def upload_to_s3(data, key, folder: S3Folders=S3Folders.TEMP) -> bool:
+def upload_to_s3(data, file_name, folder: S3Folders = S3Folders.TEMP) -> bool:
     """
     Uploads a file to S3 at a given folder path
     """
-    key = S3FoldersNames[folder] + '/' + key
+    key = S3FoldersNames[folder] + '/' + file_name
 
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY,
                         aws_secret_access_key=settings.AWS_SECRET_KEY,
@@ -43,11 +43,13 @@ def upload_to_s3(data, key, folder: S3Folders=S3Folders.TEMP) -> bool:
     return True
 
 
-def generate_presigned_url(key, folder: S3Folders=S3Folders.TEMP) -> str:
+def generate_presigned_url(file_name, folder: S3Folders = S3Folders.TEMP) -> str:
     """
     Generates a download link for a file stored in S3
     """
-    key = S3FoldersNames[folder] + '/' + key
+    print("========")
+    print(file_name)
+    key = S3FoldersNames[folder] + '/' + file_name
 
     s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY,
                       aws_secret_access_key=settings.AWS_SECRET_KEY,
