@@ -3,6 +3,7 @@ db.sqlite3
 .DS_Store
 .coverage
 venv
+app/.venv
 .idea
 __pycache__
 .#*
