@@ -11,7 +11,9 @@ from django.contrib.auth.models import User
 from megatron.interpreters.slack import formatting
 from megatron.connections.actions import Action, ActionType
 from megatron.models import (
-    MegatronChannel, MegatronUser, MegatronMessage, PlatformUser)
+    MegatronChannel, MegatronUser, MegatronMessage, PlatformUser,
+    CustomerWorkspace
+)
 from megatron.services import (
     IntegrationService, WorkspaceService, MegatronChannelService)
 from megatron.statics import RequestData
@@ -27,6 +29,13 @@ def open_channel(megatron_user_id: int, serialized_request_data: dict, arguments
     platform_user_id = arguments['targeted_platform_id']
     integration = megatron_user.megatronintegration_set.first()
     connection = IntegrationService(integration).get_connection(as_user=False)
+
+    # Ensure platform user exists
+    if not PlatformUser.objects.filter(platform_id=platform_user_id).exists:
+        user_info = connection._get_user_info(platform_user_id)
+        workspace = CustomerWorkspace.objects.get(platform_id=user_info['team_id'])
+        WorkspaceService(workspace).get_or_create_user_by_id(platform_user_id)
+
     new_msg = formatting.user_titled(platform_user_id, "Connecting....")
     response = connection.respond_to_url(request_data.response_url, new_msg)
     if not response.get('ok'):

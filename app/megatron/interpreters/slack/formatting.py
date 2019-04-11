@@ -13,7 +13,6 @@ class Colors:
 
 
 def user_titled(platform_user_id: str, text: str) -> dict:
-    # TODO: Make a request to slack to get specific user details
     platform_user = PlatformUser.objects.get(platform_id=platform_user_id)
     username = platform_user.username + "@" + platform_user.workspace.domain
     msg = {
