@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Tuple
 from datetime import datetime, timezone, timedelta
 
@@ -206,6 +207,7 @@ def _update_channel_link(megatron_user_id: int, platform_user_id: str, response_
 
     if not megatron_channel:
         username = platform_user.username + "_" + platform_user.workspace.domain
+        username = re.sub(r"[^\w-]", "", username.lower())
         response = connection.create_channel(
             f'{settings.CHANNEL_PREFIX}{username}')
         if not response:
