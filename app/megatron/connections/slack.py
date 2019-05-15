@@ -369,17 +369,18 @@ class SlackConnection(BotConnection):
             msg['attachments'] = [footer_attach]
         return msg
 
-    def _refresh_access_token(self, platform_user_id):
+    def _refresh_access_token(self):
         megatron_user = MegatronUser.objects.first()
-        response = requests.post(
+        response = safe_requests.post(
             megatron_user.command_url,
             json={
                 'command': 'refresh_workspace',
                 'megatron_verification_token': megatron_user.verification_token
             }
         )
-        if response['ok']:
-            data = response['data']
+        response_data = response.json()
+        if response_data['ok']:
+            data = response_data['data']
             workspace = CustomerWorkspace.objects.get(
                 connection_token=self.token
             )
