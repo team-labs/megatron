@@ -47,8 +47,6 @@ def generate_presigned_url(file_name, folder: S3Folders = S3Folders.TEMP) -> str
     """
     Generates a download link for a file stored in S3
     """
-    print("========")
-    print(file_name)
     key = S3FoldersNames[folder] + '/' + file_name
 
     s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY,
