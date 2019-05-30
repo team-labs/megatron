@@ -37,7 +37,7 @@ def fake_app_response(monkeypatch):
         resp.json = fake_resp
         return resp
 
-    monkeypatch.setattr(slack.requests, 'post', fake_post)
+    monkeypatch.setattr(slack.safe_requests, 'post', fake_post)
 
 
 @pytest.mark.django_db

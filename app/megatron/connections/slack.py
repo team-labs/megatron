@@ -371,7 +371,7 @@ class SlackConnection(BotConnection):
 
     def _refresh_access_token(self, platform_user_id):
         megatron_user = MegatronUser.objects.first()
-        response = requests.post(
+        response = safe_requests.post(
             megatron_user.command_url,
             json={
                 'command': 'refresh_workspace',
