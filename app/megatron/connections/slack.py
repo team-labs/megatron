@@ -376,8 +376,7 @@ class SlackConnection(BotConnection):
             json={
                 'command': 'refresh_workspace',
                 'megatron_verification_token': megatron_user.verification_token
-            },
-            timeout=10
+            }
         )
         response_json = response.json()
         if response_json['ok']:
