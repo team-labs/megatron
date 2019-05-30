@@ -37,7 +37,7 @@ def incoming_message(msg_data: dict):
     if FRONT_CONNECTION.token == 'ignore':
         return
 
-    workspace_platform_id = msg_data['team']
+    workspace_platform_id = msg_data['team_id']
     user_platform_id = msg_data['user']
     workspace = models.CustomerWorkspace.objects.get(platform_id=workspace_platform_id)
     platform_user = services.WorkspaceService(
