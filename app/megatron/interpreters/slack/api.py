@@ -140,7 +140,7 @@ def interactive_message(request):
 
     if not platform_user:
         LOGGER.error("Could not identify platform user to act on.",
-                     extra={'platform_user_id': user_id})
+                     extra={'platform_user_id': platform_user_id})
         return
 
     arguments = {'targeted_user_id': platform_user.id, 'targeted_platform_id': platform_user_id}
