@@ -370,20 +370,26 @@ class SlackConnection(BotConnection):
         return msg
 
     def _refresh_access_token(self, platform_user_id):
+        try:
+            workspace = CustomerWorkspace.objects.get(
+                connection_token=self.token
+            )
+        except CustomerWorkspace.DoesNotExist:
+            LOGGER.error(f"Could not find workspace for platform user id: {platform_user_id}")
+            return
+
         megatron_user = MegatronUser.objects.first()
         response = safe_requests.post(
             megatron_user.command_url,
             json={
                 'command': 'refresh_workspace',
-                'megatron_verification_token': megatron_user.verification_token
+                'megatron_verification_token': megatron_user.verification_token,
+                'workspace_platform_id': workspace.platform_id,
             }
         )
         response_json = response.json()
         if response_json['ok']:
             data = response_json['data']
-            workspace = CustomerWorkspace.objects.get(
-                connection_token=self.token
-            )
             workspace.name = data['name']
             workspace.domain = data['domain']
             workspace.connection_token = data['connection_token']
