@@ -2,8 +2,7 @@ from typing import List
 
 
 class BotConnection:
-    def broadcast(self, broadcast: dict, user_ids: List[str],
-                  capture_feedback: bool):
+    def broadcast(self, broadcast: dict, user_ids: List[str], capture_feedback: bool):
         raise NotImplementedError
 
     def message(self, bot_user_id: str, msg: str):

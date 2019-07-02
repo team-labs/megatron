@@ -23,5 +23,3 @@ def root(request):
 </pre>
     """
     return HttpResponse(megatron_text, content_type="text/html")
-
-

@@ -3,6 +3,7 @@
 
 from megatron.models import MegatronChannel, PlatformUser
 
+
 class Colors:
     gold = "ff9e16"
     orange = "e15829"
@@ -15,14 +16,7 @@ class Colors:
 def user_titled(platform_user_id: str, text: str) -> dict:
     platform_user = PlatformUser.objects.get(platform_id=platform_user_id)
     username = platform_user.username + "@" + platform_user.workspace.domain
-    msg = {
-        "attachments": [
-            {
-                "text": text,
-                "title": username
-            }
-        ]
-    }
+    msg = {"attachments": [{"text": text, "title": username}]}
     return msg
 
 
@@ -42,13 +36,13 @@ def get_pause_warning(workspace_id: str, platform_user_id: str):
                         "name": "unpause",
                         "type": "button",
                         "text": "Unpause Bot",
-                        "value": f'{workspace_id}-{platform_user_id}'
+                        "value": f"{workspace_id}-{platform_user_id}",
                     }
                 ],
                 "callback_id": "unpause",
-                "fallback": " "
+                "fallback": " ",
             }
-        ]
+        ],
     }
     return msg
 
@@ -69,12 +63,12 @@ def get_unpaused_warning(workspace_id: str, platform_user_id: str):
                         "name": "pause",
                         "type": "button",
                         "text": "Pause Bot",
-                        "value": f'{workspace_id}-{platform_user_id}'
+                        "value": f"{workspace_id}-{platform_user_id}",
                     }
                 ],
                 "callback_id": "pause",
-                "fallback": " "
+                "fallback": " ",
             }
-        ]
+        ],
     }
     return msg

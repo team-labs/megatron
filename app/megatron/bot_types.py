@@ -19,8 +19,7 @@ class BotType(Enum):
         if self == BotType.slack:
             platform_type = PlatformType.Slack.value
         workspace = CustomerWorkspace.objects.get(
-            platform_id=platform_id,
-            platform_type=platform_type
+            platform_id=platform_id, platform_type=platform_type
         )
         if self == BotType.slack:
             return slack.SlackConnection(workspace.connection_token)

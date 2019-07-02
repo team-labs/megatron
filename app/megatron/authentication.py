@@ -20,11 +20,12 @@ def get_organization_token(organization) -> str:
 def validate_slack_token(func):
     def wrapper(request):
         data = request.POST
-        verification_token = data['token']
+        verification_token = data["token"]
         if verification_token == VERIFICATION_TOKEN:
             return func(request)
         else:
             return HttpResponse("Incorrect validation token.", status=401)
+
     return wrapper
 
 

@@ -13,16 +13,15 @@ class SafeRequest:
         self.get_response_data = get_response_data
 
     def safe_requests(self, method, url, *args, **kwargs):
-        if not kwargs.get('timeout'):
+        if not kwargs.get("timeout"):
             timeout = 10
         else:
-            timeout = kwargs.get('timeout')
+            timeout = kwargs.get("timeout")
         try:
-            response = requests.request(method, url, *args, **kwargs,
-                                        timeout=timeout)
+            response = requests.request(method, url, *args, **kwargs, timeout=timeout)
         except requests.Timeout:
             LOGGER.exception("Megatron request timed out.")
-            return MegatronResponse({'ok': False, 'error': 'Timeout error'}, 500)
+            return MegatronResponse({"ok": False, "error": "Timeout error"}, 500)
 
         try:
             verified = self.response_verification(response)
@@ -32,13 +31,15 @@ class SafeRequest:
             return response
 
         if not verified:
-            LOGGER.exception("Recieved error response from platform.",
-                             extra={'response': response_data})
+            LOGGER.exception(
+                "Recieved error response from platform.",
+                extra={"response": response_data},
+            )
 
         return response
 
     def post(self, url, data=None, json=None, **kwargs):
-        return self.safe_requests('post', url, data=data, json=json, **kwargs)
+        return self.safe_requests("post", url, data=data, json=json, **kwargs)
 
     def get(self, url, data=None, json=None, **kwargs):
-        return self.safe_requests('get', url, data=data, json=json, **kwargs)
+        return self.safe_requests("get", url, data=data, json=json, **kwargs)

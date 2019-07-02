@@ -14,4 +14,3 @@ class NotificationChannels(Enum):
     dev_ops = 2
     customer_service = 3
     security = 4
-

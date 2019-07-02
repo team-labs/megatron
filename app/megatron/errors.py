@@ -10,7 +10,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MegatronError(Enum):
-
     @property
     def status_code(self):
         pass
@@ -22,11 +21,12 @@ class MegatronException(Exception):
 
 
 class ErrorResponse(Response):
-    def __init__(self, error: MegatronError, status: status=status.HTTP_200_OK,
-                 *args, **kwargs) -> None:
+    def __init__(
+        self, error: MegatronError, status: status = status.HTTP_200_OK, *args, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.status = status
-        self.data = {'ok': False, 'error': error.name}
+        self.data = {"ok": False, "error": error.name}
 
 
 class BroadcastError(MegatronError):
@@ -55,10 +55,7 @@ def catch_megatron_errors(func):
             response = func(*args, **kwargs)
         except MegatronException as exc:
             LOGGER.exception(exc)
-            return {
-                'ok': False,
-                'error': 'Unrecognized error.',
-                'status': 500
-            }
+            return {"ok": False, "error": "Unrecognized error.", "status": 500}
         return response
+
     return wrapper

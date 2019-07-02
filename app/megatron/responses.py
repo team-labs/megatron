@@ -8,7 +8,7 @@ class MegatronResponse(HttpResponse):
         super().__init__(*args, **kwargs)
         self.content = json.dumps(json_data)
         self.status_code = status
-        self.content_type = 'application/json'
+        self.content_type = "application/json"
 
 
-OK_RESPONSE = MegatronResponse({'ok': True}, 200)
+OK_RESPONSE = MegatronResponse({"ok": True}, 200)

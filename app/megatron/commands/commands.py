@@ -18,49 +18,50 @@ class Command:
 
 
 forward_message = Command(
-    text='forward',
-    description='forward message',
+    text="forward",
+    description="forward message",
     parse=parsing.get_targeted_user_id,
-    action=actions.forward_message)
+    action=actions.forward_message,
+)
 open_channel = Command(
-    text='open',
+    text="open",
     description="Who are you trying to connect with?",
     parse=parsing.require_targeted_user_id,
-    action=actions.open_channel)
+    action=actions.open_channel,
+)
 close_channel = Command(
-    text='close',
+    text="close",
     description="Who's channel are you trying to close?",
     parse=parsing.get_targeted_user_id,
-    action=actions.close_channel)
+    action=actions.close_channel,
+)
 pause_channel = Command(
-    text='pause',
+    text="pause",
     description="Who's bot are you trying to pause?",
     parse=parsing.get_targeted_user_id,
-    action=actions.pause_channel)
+    action=actions.pause_channel,
+)
 unpause_channel = Command(
-    text='unpause',
+    text="unpause",
     description="Who's bot are you trying to unpause?",
     parse=parsing.get_targeted_user_id,
-    action=actions.unpause_channel)
+    action=actions.unpause_channel,
+)
 clear_context = Command(
-    text='clear-context',
+    text="clear-context",
     description="Who's context are you trying to clear?",
     parse=parsing.get_targeted_user_id,
-    action=actions.clear_context)
-do = Command(
-    text='do',
-    description="",
-    parse=parsing.passthrough,
-    action=actions.do
+    action=actions.clear_context,
 )
+do = Command(text="do", description="", parse=parsing.passthrough, action=actions.do)
 
 
 COMMAND_MAPPING = {
-    'forward': forward_message,
-    'open': open_channel,
-    'close': close_channel,
-    'pause': pause_channel,
-    'unpause': unpause_channel,
-    'clear-context': clear_context,
-    'do': do
+    "forward": forward_message,
+    "open": open_channel,
+    "close": close_channel,
+    "pause": pause_channel,
+    "unpause": unpause_channel,
+    "clear-context": clear_context,
+    "do": do,
 }
