@@ -105,4 +105,7 @@ class MegatronChannelService:
         if response['ok']:
             self.channel.is_archived = True
             self.channel.save()
+        elif response['error'] == "already_archived":
+            self.channel.is_archived = True
+            self.channel.save()
         return response

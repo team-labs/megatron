@@ -50,8 +50,6 @@ def response_verification(response):
 
 
 def get_response_data(response):
-    if response.text == "ok":
-        response_data = {}
     try:
         response_data = response.json()
     except ValueError:
@@ -156,6 +154,11 @@ class SlackConnection(BotConnection):
 
         return response.json()
 
+    @catch_megatron_errors
+    def message(self, channel: str, msg: dict):
+        response = self._post_to_channel(channel, msg)
+        return response.json()
+
     def open_im(self, slack_user_id: str):
         open_im_data = {'token': self.token, 'user': slack_user_id}
         open_response = safe_requests.post(OPEN_IM_URL, open_im_data)
@@ -205,7 +208,14 @@ class SlackConnection(BotConnection):
             'token': self.token,
             'channel': channel_id
         }
-        response = safe_requests.post(CONVERSATION_ARCHIVE_URL, data)
+
+        def archive_response_verification(resp):
+            if resp.status_code == 200:
+                return True
+            return False
+
+        archive_safe_requests = SafeRequest(archive_response_verification, get_response_data)
+        response = archive_safe_requests.post(CONVERSATION_ARCHIVE_URL, data)
         return response.json()
 
     @catch_megatron_errors
