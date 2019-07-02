@@ -40,7 +40,7 @@ def open_channel(
     connection = IntegrationService(integration).get_connection(as_user=False)
 
     # Ensure platform user exists
-    if not PlatformUser.objects.filter(platform_id=platform_user_id).exists:
+    if not PlatformUser.objects.filter(platform_id=platform_user_id).exists():
         user_info = connection._get_user_info(platform_user_id)
         workspace = CustomerWorkspace.objects.get(platform_id=user_info["team_id"])
         WorkspaceService(workspace).get_or_create_user_by_id(platform_user_id)
