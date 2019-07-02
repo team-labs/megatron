@@ -176,7 +176,7 @@ class SlackConnection(BotConnection):
         response_data = response.json()
         if not response_data["ok"]:
             raise MegatronException(
-                ("Could not retrieve history for DM channel: {}. " "Error: {}").format(
+                ("Could not retrieve history for DM channel: {}. Error: {}").format(
                     channel_id, response_data["error"]
                 )
             )
@@ -245,7 +245,6 @@ class SlackConnection(BotConnection):
         return image, extension
 
     def get_channel_by_name(self, channel_name) -> Optional["dict"]:
-        selected_channel = None
         data = {"token": self.token, "exclude_members": True}
         response = safe_requests.post(CHANNELS_LIST_URL, data)
         response_data = response.json()
