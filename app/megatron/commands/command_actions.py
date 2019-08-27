@@ -42,10 +42,13 @@ def open_channel(
     # Ensure platform user exists
     if not PlatformUser.objects.filter(platform_id=platform_user_id).exists():
         user_info = connection._get_user_info(platform_user_id)
-        workspace = CustomerWorkspace.objects.get(platform_id=user_info["team_id"])
+        try:
+            workspace = CustomerWorkspace.objects.get(platform_id=user_info["user"]["team_id"])
+        except (CustomerWorkspace.DoesNotExist, KeyError):
+            return {"ok": False, "error": "Customer Workspace not found"}
         WorkspaceService(workspace).get_or_create_user_by_id(platform_user_id)
 
-    new_msg = formatting.user_titled(platform_user_id, "Connecting....")
+    new_msg = formatting.user_titled(platform_user_id, "Connecting...")
     response = connection.respond_to_url(request_data.response_url, new_msg)
     if not response.get("ok"):
         return response
