@@ -47,7 +47,7 @@ CRONTABS = {
 def setup_periodic_tasks(sender, **kwargs):
     app.conf.beat_schedule = {
         "Refresh Platform User Data": {
-            "task": "megatron.scheduled_tasks",
+            "task": "megatron.scheduled_tasks.refresh_platform_user_data",
             "schedule": CRONTABS["daily"],
             "options": {"queue": "megatron"},
         },
