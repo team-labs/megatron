@@ -36,7 +36,7 @@ custom Slack app.
 		* ``channels:history``
 		* ``channels:read``
 		* ``channels:write``
-		* ``channels:write:bot``
+		* ``chat:write:bot``
 		* ``commands``
 		* ``users:read``
 
@@ -44,7 +44,7 @@ custom Slack app.
 
 	* Click "Event Subscriptions" on the left side of the screen
 	* Change the switch in the top-right to "On"
-	* Under "Request URL" enter ``<your_app>/megatron/slack/interactive-message/``
+	* Under "Request URL" enter ``<your_app>/megatron/slack/event/``
 	* Under "Subscribe to Workspace Events" search for and add ``message.channels``
 	* Click "Save Changes"
 
