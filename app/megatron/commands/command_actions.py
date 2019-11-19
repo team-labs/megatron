@@ -232,7 +232,7 @@ def _update_channel_link(
             return
 
         megatron_channel, created = _create_or_update_channel(
-            megatron_user, response["channel"], platform_user
+            megatron_user, response["channel"], platform_user, username
         )
         if created:
             _get_conversation_history(megatron_channel)
@@ -267,13 +267,14 @@ def _get_channel_link(megatron_user: MegatronUser, channel_id: str):
 
 
 def _create_or_update_channel(
-    megatron_user, channel_data, platform_user: PlatformUser
+    megatron_user, channel_data, platform_user: PlatformUser, username: str
 ) -> Tuple[MegatronChannel, bool]:
     workspace = platform_user.workspace
     channel, created = MegatronChannel.objects.get_or_create(
         megatron_user=megatron_user,
         workspace=workspace,
         platform_channel_id=channel_data["id"],
+        name=f"{settings.CHANNEL_PREFIX}{username}",
         defaults={
             "platform_user_id": platform_user.platform_id,
             "megatron_integration": (megatron_user.megatronintegration_set.first()),

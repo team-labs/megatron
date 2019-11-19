@@ -130,3 +130,14 @@ class PlatformUser(models.Model):
         elif self.real_name:
             return self.real_name
         return self.username
+
+
+class ZendeskTickets(models.Model):
+    zendesk_id = models.IntegerField()
+    megatron_channel = models.ForeignKey(MegatronChannel, on_delete=models.CASCADE)
+    is_closed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = (
+            ("zendesk_id", "megatron_channel"),
+        )

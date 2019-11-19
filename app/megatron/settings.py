@@ -43,10 +43,16 @@ LOAD_BALANCER_HOST = "load-balancing.teampay.co"
 ALLOWED_HOSTS = {FORMATTED_HOSTNAME, LOAD_BALANCER_HOST, "0.0.0.0", "localhost"}
 
 # ==================== Logging ========================
-FRONT_TOKEN = None
-FRONT_CHANNEL = None
+ZENDESK_TOKEN = os.environ.get("ZENDESK_TOKEN")
+ZENDESK_SUBDOMAIN = os.environ.get("ZENDESK_SUBDOMAIN")
+ZENDESK_ADMIN_EMAIL = os.environ.get("ZENDESK_ADMIN_EMAIL")
+ZENDESK_BOT_EMAIL = os.environ.get("ZENDESK_BOT_EMAIL")
+
 if MEGATRON_APP_MODE != "megatron-dev":
-    FRONT_TOKEN = os.environ.get("FRONT_TOKEN")
+    ZENDESK_TOKEN = os.environ.get("ZENDESK_TOKEN")
+    ZENDESK_SUBDOMAIN = os.environ.get("ZENDESK_SUBDOMAIN")
+    ZENDESK_ADMIN_EMAIL = os.environ.get("ZENDESK_ADMIN_EMAIL")
+    ZENDESK_BOT_EMAIL = os.environ.get("ZENDESK_BOT_EMAIL")
 
 import dj_database_url  # noqa
 

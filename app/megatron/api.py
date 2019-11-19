@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from megatron import front_integration
+from megatron import zendesk_integration
 from megatron.connections.actions import ActionType, Action
 from megatron.statics import RequestData, NotificationChannels
 from megatron.responses import MegatronResponse, OK_RESPONSE
@@ -40,10 +40,12 @@ def incoming(request) -> MegatronResponse:
     if not channel or channel.is_archived:
         return MegatronResponse({"ok": True, "track": False}, 200)
     response = team_interpreter.incoming(msg, channel)
+    channel_id = channel.id
+
     if response.get("ok"):
 
         if response.get("watched_channel"):
-            front_integration.incoming_message.delay(msg)
+            zendesk_integration.incoming_message.delay(channel_id, msg)
             channel = MegatronChannel.objects.filter(
                 platform_user_id=request.data["message"]["user"]
             ).first()
@@ -77,10 +79,11 @@ def outgoing(request) -> MegatronResponse:
     interpreter = IntegrationService(megatron_integration).get_interpreter()
     customer_workspace_id = megatron_channel.workspace.platform_id
     response = interpreter.outgoing(message, megatron_channel)
+    channel_id = megatron_channel.id
     if response.get("ok"):
         if response.get("watched_channel"):
-            front_integration.outgoing_message.delay(
-                user_id, customer_workspace_id, message
+            zendesk_integration.outgoing_message.delay(
+                channel_id, user_id, customer_workspace_id, message
             )
             megatron_msg = MegatronMessage(
                 integration_msg_id=response["ts"],

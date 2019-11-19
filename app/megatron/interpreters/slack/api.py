@@ -8,7 +8,7 @@ from django.db.utils import IntegrityError
 from kombu.utils import json as kombu_json
 from datetime import datetime
 
-from megatron import front_integration
+from megatron import zendesk_integration
 from megatron.authentication import validate_slack_token
 from megatron.models import (
     MegatronChannel,
@@ -224,8 +224,8 @@ def event(request):
             platform_channel_id=channel_id
         ).first()
         if tracked_channel:
-            front_integration.team_member_message.delay(
-                user_id, tracked_channel.platform_user_id, data["event"]
+            zendesk_integration.team_member_message.delay(
+                tracked_channel.id, user_id, tracked_channel.platform_user_id, data["event"]
             )
             try:
                 MegatronMessage.objects.create(
