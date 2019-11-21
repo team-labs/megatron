@@ -94,12 +94,12 @@ def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     if from_user:
         msg = connection.add_forward_footer(msg, from_user)
     response = connection.dm_user(platform_user_id, msg)
-
+    
     engagement_channel.last_message_sent = datetime.now(timezone.utc)
     engagement_channel.save()
 
     megatron_msg, _ = MegatronMessage.objects.update_or_create(
-        integration_msg_id=msg["ts"],
+        integration_msg_id=msg.get("ts"),
         megatron_channel=engagement_channel,
         defaults={"customer_msg_id": response["ts"]},
     )
@@ -370,4 +370,16 @@ def _change_pause_state(
         ActionType.POST_MESSAGE, {"channel": channel, "message": msg}
     )
     integration_connection.take_action(message_action)
+
+    user_msg = {
+        'text': f"*WARNING:* The bot has been *{paused_word}*.",
+        'attachments': [
+            {
+                "text": "",
+                "footer": f"Executed by Teampay.",
+            }
+        ]
+    }
+    forward_message(channel, user_msg)
+
     return {"ok": True}
