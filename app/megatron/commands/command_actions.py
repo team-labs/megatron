@@ -98,7 +98,7 @@ def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     engagement_channel.last_message_sent = datetime.now(timezone.utc)
     engagement_channel.save()
 
-    megatron_msg, _ = MegatronMessage.objects.update_or_create(
+    megatron_msg, _ = MegatronMessage.objects.exclude(integration_msg_id__isnull=True).update_or_create(
         integration_msg_id=msg.get("ts"),
         megatron_channel=engagement_channel,
         defaults={"customer_msg_id": response["ts"]},
