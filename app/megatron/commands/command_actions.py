@@ -94,7 +94,7 @@ def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     if from_user:
         msg = connection.add_forward_footer(msg, from_user)
     response = connection.dm_user(platform_user_id, msg)
-    
+
     engagement_channel.last_message_sent = datetime.now(timezone.utc)
     engagement_channel.save()
 
@@ -371,8 +371,13 @@ def _change_pause_state(
     )
     integration_connection.take_action(message_action)
 
+    paused_phrase = (
+        "Hey, there! I've been paused so a support agent can talk with you. I'll let you know when I'm back online"
+        if pause
+        else "Hey, there! I've been unpaused and I'm back online to help you with everything I can. "
+    )
     user_msg = {
-        'text': f"*WARNING:* The bot has been *{paused_word}*.",
+        'text': paused_phrase,
         'attachments': [
             {
                 "text": "",
