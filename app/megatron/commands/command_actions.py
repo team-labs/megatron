@@ -65,16 +65,17 @@ def close_channel(
     request_data = RequestData(**serialized_request_data)
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
     targeted_slack_id = arguments["targeted_platform_id"]
+    
+    response = _unpause_channel(megatron_user.id, request_data, arguments)
+    if not response.get("ok"):
+        return response
+
     try:
         megatron_channel = MegatronChannel.objects.get(
             platform_user_id=targeted_slack_id
         )
     except MegatronChannel.DoesNotExist:
         return {"ok": False, "error": "Channel not found"}
-
-    response = _unpause_channel(megatron_user.id, request_data, arguments)
-    if not response.get("ok"):
-        return response
 
     response = MegatronChannelService(megatron_channel).archive()
     if not response.get("ok"):
