@@ -321,7 +321,7 @@ def _format_slack_timestamp(timestamp, previous_ts):
 
 def _change_pause_state(
     megatron_user: MegatronUser,
-    platform_user: User,
+    platform_user: PlatformUser,
     request_data: RequestData,
     pause=False,
 ) -> dict:
@@ -364,13 +364,14 @@ def _change_pause_state(
         as_user=False
     )
     paused_word = "paused" if pause else "unpaused"
-    msg = {"text": f"Bot *{paused_word}* for user: {platform_user}."}
+    msg = {"text": f"Bot *{paused_word}* for user: {platform_user.username}."}
     channel = request_data.channel_id
     message_action = Action(
         ActionType.POST_MESSAGE, {"channel": channel, "message": msg}
     )
     integration_connection.take_action(message_action)
 
+    from_user = PlatformUser.objects.get(platform_id=request_data.user_id)
     paused_phrase = (
         "Hey, there! I've been paused so a support agent can talk with you. I'll let you know when I'm back online"
         if pause
@@ -381,7 +382,8 @@ def _change_pause_state(
         'attachments': [
             {
                 "text": "",
-                "footer": f"Executed by Teampay.",
+                "footer": f"executed by {from_user.username} from Teampay",
+                "footer_icon": f"{from_user.profile_image}",
             }
         ]
     }
