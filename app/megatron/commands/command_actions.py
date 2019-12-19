@@ -99,8 +99,8 @@ def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     engagement_channel.last_message_sent = datetime.now(timezone.utc)
     engagement_channel.save()
 
-    megatron_msg, _ = MegatronMessage.objects.update_or_create(
-        integration_msg_id=msg["ts"],
+    megatron_msg, _ = MegatronMessage.objects.exclude(integration_msg_id__isnull=True).update_or_create(
+        integration_msg_id=msg.get("ts"),
         megatron_channel=engagement_channel,
         defaults={"customer_msg_id": response["ts"]},
     )
@@ -322,7 +322,7 @@ def _format_slack_timestamp(timestamp, previous_ts):
 
 def _change_pause_state(
     megatron_user: MegatronUser,
-    platform_user: User,
+    platform_user: PlatformUser,
     request_data: RequestData,
     pause=False,
 ) -> dict:
@@ -365,10 +365,29 @@ def _change_pause_state(
         as_user=False
     )
     paused_word = "paused" if pause else "unpaused"
-    msg = {"text": f"Bot *{paused_word}* for user: {platform_user}."}
+    msg = {"text": f"Bot *{paused_word}* for user: {platform_user.username}."}
     channel = request_data.channel_id
     message_action = Action(
         ActionType.POST_MESSAGE, {"channel": channel, "message": msg}
     )
     integration_connection.take_action(message_action)
+
+    from_user = PlatformUser.objects.get(platform_id=request_data.user_id)
+    paused_phrase = (
+        "Hey, there! I've been paused so a support agent can talk with you. I'll let you know when I'm back online"
+        if pause
+        else "Hey, there! I've been unpaused and I'm back online to help you with everything I can. "
+    )
+    user_msg = {
+        'text': paused_phrase,
+        'attachments': [
+            {
+                "text": "",
+                "footer": f"executed by {from_user.username} from Teampay",
+                "footer_icon": f"{from_user.profile_image}",
+            }
+        ]
+    }
+    forward_message(channel, user_msg)
+
     return {"ok": True}
