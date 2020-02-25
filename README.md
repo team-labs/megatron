@@ -5,7 +5,7 @@ Megatron
 <p align="center"> Chatbots in disguise!</p>
 
 Megatron allows engineers, customer-service, and occasionally CEOs, to peer into 
-a live DM channel between the your chatbot and a customer. Your're able to 'become 
+a live DM channel between your chatbot and a customer. You're able to 'become 
 the bot' through Megatron, sending responses directly from your existing chatbot. 
 Best of all, this happens from within your existing app. **There's nothing 
 more your customers need to install or authorize, and no external tools for you.**
@@ -17,7 +17,7 @@ Here's how a quick example of how it works:
 2. Jane, your customer service rep at, opens a channel on your team. This 
 channel immediately imports the conversation between Phil and your chatbot.
 3. Jane pauses the bot and responds to Phil in the new channel on your team. 
-e.g "Hi Phil. I see you're having some trouble make a purchase. I'm here to help!"
+e.g "Hi Phil. I see you're having some trouble making a purchase. I'm here to help!"
 4. Phil receives that message on his own team, **from the bot he was just 
 talking to.**
 5. Phil and Jane continue speaking **across two different teams** until 
@@ -44,7 +44,7 @@ is a pretty painless process.
 
 [**Click here for local setup instructions!**](https://teampay-megatron.readthedocs.io/en/latest/)
 
-Megatron is a fully featured Django app and generally follows the microservice
+Megatron is a fully-featured Django app and generally follows the microservice
 pattern. Getting up and running in a production environment is highly dependent
 on your existing architecture.
 
