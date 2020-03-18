@@ -1,6 +1,9 @@
 import pytest
+import requests
+from requests.models import Response
 
 from megatron import models, bot_types, services
+from megatron.connections import slack
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +23,28 @@ def minimal_megatron_setup():
         platform_id="9876",
         connection_token="alsoafaketoken",
     )
+
+
+@pytest.fixture
+def fake_app_response(monkeypatch):
+    def fake_resp():
+        return {
+            "ok": True,
+            "data": {
+                "name": "BORKBORK",
+                "domain": "BORKBORKBORK",
+                "connection_token": "BORK_BORK_BORK_BORK",
+            },
+        }
+
+    def fake_post(url, json, *args, **kwargs):
+        resp = Response()
+        resp.status_code = 200
+        resp.json = fake_resp
+        return resp
+
+    monkeypatch.setattr(slack.safe_requests, "post", fake_post)
+    monkeypatch.setattr(requests, "post", fake_post)
 
 
 @pytest.fixture(autouse=True)
@@ -58,7 +83,10 @@ def no_bot_connections(monkeypatch):
         def dm_user(self, slack_id, msg):
             return {"ok": True, "ts": "1234.5678"}
 
-        def ephemeral_message(self, response_channel, response_user, msg):
+        def ephemeral_message(self, request_data, msg):
+            return {"ok": True}
+
+        def archive_channel(self, channel_id):
             return {"ok": True}
 
     def fake_get_bot_connection(self, as_user=False):

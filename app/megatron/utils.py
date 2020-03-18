@@ -4,7 +4,7 @@ import logging
 from django.contrib.auth.models import User
 
 from megatron.models import MegatronChannel
-
+from typing import Optional
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,13 +40,12 @@ def remove_sensitive_data(msg: dict):
     return msg
 
 
-def get_customer_for_megatron_channel(megatron_channel_id: str) -> dict:
+def get_customer_for_megatron_channel(megatron_channel_id: str) -> Optional[dict]:
     try:
         channel = MegatronChannel.objects.get(platform_channel_id=megatron_channel_id)
-        targeted_user = {
+        return {
             "platform_user_id": channel.platform_user_id,
             "platform_team_id": channel.workspace.platform_id,
         }
     except MegatronChannel.DoesNotExist:
-        targeted_user = {}
-    return targeted_user
+        return None

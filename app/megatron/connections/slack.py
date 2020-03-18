@@ -2,12 +2,18 @@ import logging
 import json
 import os
 import requests
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Union
 from simplejson.scanner import JSONDecodeError
 
 from megatron.connections.actions import ActionType, Action
 from .bot_connection import BotConnection
-from megatron.models import PlatformUser, CustomerWorkspace, MegatronUser
+from megatron.models import (
+    PlatformUser,
+    CustomerWorkspace,
+    MegatronUser,
+    MegatronChannel,
+    PlatformAgent,
+)
 from megatron.errors import catch_megatron_errors, MegatronException
 from megatron.connections.safe_requests import SafeRequest
 from megatron import aws
@@ -136,6 +142,11 @@ class SlackConnection(BotConnection):
                 response_data = {"ok": True}
             else:
                 response_data = {"ok": False}
+        if not response_data.get("ok"):
+            LOGGER.error(
+                f"Problem updating slack message",
+                extra={"Error Message": response["error"]},
+            )
         return response_data
 
     @catch_megatron_errors
@@ -237,7 +248,10 @@ class SlackConnection(BotConnection):
         if response.status_code == 200:
             image = response.content
         else:
-            LOGGER.error(f"Error downloading image from Slack:" f"{response.text}")
+            LOGGER.error(
+                f"Error downloading image from Slack:",
+                extra={"Error Message": response.text},
+            )
             return None
 
         _, extension = os.path.splitext(url)
@@ -321,7 +335,7 @@ class SlackConnection(BotConnection):
         }
         return attach
 
-    def build_img_attach(self, msg, platform_user: PlatformUser) -> dict:
+    def build_img_attach(self, msg, user: Union[PlatformUser, PlatformAgent]) -> dict:
         attachments = []
         for file_data in msg["files"]:
             image, extension = self.get_image(file_data)
@@ -329,8 +343,8 @@ class SlackConnection(BotConnection):
             img_url = aws.generate_presigned_url(key, aws.S3Folders.TEMP)
             attachments.append({"text": "", "image_url": img_url})
         msg = {
-            "username": platform_user.username,
-            "icon_url": platform_user.profile_image,
+            "username": user.username,
+            "icon_url": user.profile_image,
             "ts": msg.get("ts"),
             "attachments": attachments,
         }
@@ -352,10 +366,20 @@ class SlackConnection(BotConnection):
         try:
             workspace = CustomerWorkspace.objects.get(connection_token=self.token)
         except CustomerWorkspace.DoesNotExist:
-            LOGGER.error(
-                f"Could not find workspace for platform user id: {platform_user_id}"
-            )
-            return
+            workspace = None
+
+        if not workspace:
+            try:
+                workspace = MegatronChannel.objects.get(
+                    megatron_integration__connection_token=self.token,
+                    platform_user_id=platform_user_id,
+                ).workspace
+            except MegatronChannel.DoesNotExist:
+                LOGGER.error(
+                    f"Could not find workspace for platform user id.",
+                    extra={"platform_user_id": platform_user_id},
+                )
+                return
 
         megatron_user = MegatronUser.objects.first()
         response = safe_requests.post(

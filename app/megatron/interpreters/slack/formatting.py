@@ -13,10 +13,18 @@ class Colors:
     red = "E13704"
 
 
-def user_titled(platform_user_id: str, text: str) -> dict:
-    platform_user = PlatformUser.objects.get(platform_id=platform_user_id)
+def user_titled(platform_user: PlatformUser, text: str) -> dict:
     username = platform_user.username + "@" + platform_user.workspace.domain
     msg = {"attachments": [{"text": text, "title": username}]}
+    return msg
+
+
+def error_ephemeral(text: str, extra={}) -> dict:
+    for name, value in extra.items():
+        text += f"\n*{name}:* {value}"
+    msg = {
+        "attachments": [{"color": Colors.red, "text": text, "title": "Error found."}]
+    }
     return msg
 
 

@@ -63,11 +63,9 @@ class MegatronChannel(models.Model):
     megatron_user = models.ForeignKey(MegatronUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     megatron_integration = models.ForeignKey(
-        MegatronIntegration, null=True, on_delete=models.CASCADE
+        MegatronIntegration, on_delete=models.CASCADE
     )
-    workspace = models.ForeignKey(
-        CustomerWorkspace, null=True, on_delete=models.CASCADE
-    )
+    workspace = models.ForeignKey(CustomerWorkspace, on_delete=models.CASCADE)
     # This is the commands megatron channel (e.g. zz-Preston)
     platform_channel_id = models.CharField(max_length=63)
     last_message_sent = models.DateTimeField(auto_now_add=True)
@@ -120,6 +118,29 @@ class PlatformUser(models.Model):
 
     class Meta:
         unique_together = ("platform_id", "workspace")
+
+    def __str__(self):
+        return self.username
+
+    def get_display_name(self):
+        if self.display_name:
+            return self.display_name
+        elif self.real_name:
+            return self.real_name
+        return self.username
+
+
+class PlatformAgent(models.Model):
+    platform_id = models.CharField(db_index=True, max_length=10)
+    integration = models.ForeignKey(MegatronIntegration, on_delete=models.CASCADE)
+
+    profile_image = models.CharField(max_length=250, default="")
+    username = models.CharField(max_length=250, default="")
+    display_name = models.CharField(max_length=250, blank=True, null=True)
+    real_name = models.CharField(max_length=250, blank=True, null=True)
+
+    class Meta:
+        unique_together = ("platform_id", "integration")
 
     def __str__(self):
         return self.username

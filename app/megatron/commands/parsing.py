@@ -41,7 +41,10 @@ def get_targeted_user_id(args: list, command, response_channel):
             {"text": "Too many arguments to command. Expecting two."}
         )
 
-    return {"targeted_platform_id": targeted_user["platform_user_id"]}
+    return {
+        "targeted_platform_user_id": targeted_user["platform_user_id"],
+        "targeted_platform_workspace_id": targeted_user["platform_team_id"],
+    }
 
 
 def require_targeted_user_id(args: list, command, response_channel):

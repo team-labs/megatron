@@ -7,10 +7,8 @@ import requests
 from celery import shared_task
 
 from django.conf import settings
-from django.contrib.auth.models import User
 
 from megatron.interpreters.slack import formatting
-from megatron.connections.actions import Action, ActionType
 from megatron.models import (
     MegatronChannel,
     MegatronUser,
@@ -35,27 +33,40 @@ def open_channel(
 ) -> dict:
     request_data = RequestData(**serialized_request_data)
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
-    platform_user_id = arguments["targeted_platform_id"]
+
+    platform_workspace_id = arguments["targeted_platform_workspace_id"]
+    platform_user_id = arguments["targeted_platform_user_id"]
+
     integration = megatron_user.megatronintegration_set.first()
-    connection = IntegrationService(integration).get_connection(as_user=False)
+    integration_connection = IntegrationService(integration).get_connection(
+        as_user=False
+    )
 
-    # Ensure platform user exists
-    if not PlatformUser.objects.filter(platform_id=platform_user_id).exists():
-        user_info = connection._get_user_info(platform_user_id)
-        try:
-            workspace = CustomerWorkspace.objects.get(platform_id=user_info["user"]["team_id"])
-        except (CustomerWorkspace.DoesNotExist, KeyError):
-            return {"ok": False, "error": "Customer Workspace not found"}
-        WorkspaceService(workspace).get_or_create_user_by_id(platform_user_id)
+    # Ensure platform user and workspace exists
+    try:
+        workspace = CustomerWorkspace.objects.get(platform_id=platform_workspace_id)
+    except CustomerWorkspace.DoesNotExist:
+        new_msg = formatting.error_ephemeral(
+            "Customer Workspace not found for user:",
+            {"user_id": platform_user_id, "workspace_id": platform_workspace_id,},
+        )
+        integration_connection.respond_to_url(request_data.response_url, new_msg)
+        return {"ok": False, "error": "Customer Workspace not found"}
+    platform_user = WorkspaceService(workspace).get_or_create_user_by_id(
+        platform_user_id
+    )
+    if not platform_user:
+        return {
+            "ok": False,
+            "error": "Could not locate platform user for incoming action",
+        }
 
-    new_msg = formatting.user_titled(platform_user_id, "Connecting...")
-    response = connection.respond_to_url(request_data.response_url, new_msg)
+    new_msg = formatting.user_titled(platform_user, "Connecting...")
+    response = integration_connection.respond_to_url(request_data.response_url, new_msg)
     if not response.get("ok"):
         return response
-    _update_channel_link.delay(
-        megatron_user.id, platform_user_id, request_data.response_url
-    )
-    return {"ok": True}
+    _update_channel_link(megatron_user.id, platform_user, request_data.response_url)
+    return response
 
 
 @shared_task
@@ -64,25 +75,64 @@ def close_channel(
 ) -> dict:
     request_data = RequestData(**serialized_request_data)
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
-    targeted_slack_id = arguments["targeted_platform_id"]
-    
-    response = _unpause_channel(megatron_user.id, request_data, arguments)
-    if not response.get("ok"):
-        return response
+
+    workspace = CustomerWorkspace.objects.get(
+        platform_id=arguments["targeted_platform_workspace_id"]
+    )
+    platform_user = WorkspaceService(workspace).get_or_create_user_by_id(
+        arguments["targeted_platform_user_id"]
+    )
+    if not platform_user:
+        return {
+            "ok": False,
+            "error": "Could not locate platform user for incoming action",
+        }
+
+    integration = megatron_user.megatronintegration_set.first()
+    integration_connection = IntegrationService(integration).get_connection(
+        as_user=False
+    )
+
+    workspace = platform_user.workspace
+    megatron_channel = MegatronChannel.objects.get(
+        workspace=workspace, platform_user_id=platform_user.platform_id
+    )
+    if megatron_channel.is_paused:
+        response = _change_pause_state(
+            megatron_user, platform_user, request_data, False
+        )
+        if not response.get("ok"):
+            return response
 
     try:
         megatron_channel = MegatronChannel.objects.get(
-            platform_user_id=targeted_slack_id
+            platform_user_id=platform_user.platform_id
         )
     except MegatronChannel.DoesNotExist:
+        new_msg = formatting.error_ephemeral(
+            "Channel not found for user.",
+            {"user": platform_user.username, "channel_id": platform_user.platform_id},
+        )
+        integration_connection.respond_to_url(request_data.response_url, new_msg)
         return {"ok": False, "error": "Channel not found"}
 
     response = MegatronChannelService(megatron_channel).archive()
-    if not response.get("ok"):
-        return response
-    return {"ok": True}
+
+    if response.get("ok"):
+        new_msg = formatting.user_titled(
+            platform_user, "Got it! The channel was closed."
+        )
+    else:
+        new_msg = formatting.user_titled(
+            platform_user, "Couldn't find an open channel."
+        )
+
+    response = integration_connection.respond_to_url(request_data.response_url, new_msg)
+    return response
 
 
+# TODO Clear this function and adequate it to sync execution, return of ephemeral messages and call parameter from
+#  the commands
 @shared_task
 def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     engagement_channel = _check_channel(channel)
@@ -99,7 +149,9 @@ def forward_message(channel: str, msg: dict, from_user: dict = None) -> dict:
     engagement_channel.last_message_sent = datetime.now(timezone.utc)
     engagement_channel.save()
 
-    megatron_msg, _ = MegatronMessage.objects.exclude(integration_msg_id__isnull=True).update_or_create(
+    megatron_msg, _ = MegatronMessage.objects.exclude(
+        integration_msg_id__isnull=True
+    ).update_or_create(
         integration_msg_id=msg.get("ts"),
         megatron_channel=engagement_channel,
         defaults={"customer_msg_id": response["ts"]},
@@ -114,10 +166,34 @@ def pause_channel(
 ) -> dict:
     request_data = RequestData(**serialized_request_data)
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
-    platform_user = PlatformUser.objects.get(
-        platform_id=arguments["targeted_platform_id"]
+
+    workspace = CustomerWorkspace.objects.get(
+        platform_id=arguments["targeted_platform_workspace_id"]
     )
+    platform_user = WorkspaceService(workspace).get_or_create_user_by_id(
+        arguments["targeted_platform_user_id"]
+    )
+    if not platform_user:
+        return {
+            "ok": False,
+            "error": "Could not locate platform user for incoming action",
+        }
+
+    integration = megatron_user.megatronintegration_set.first()
+    integration_connection = IntegrationService(integration).get_connection(
+        as_user=False
+    )
+
     response = _change_pause_state(megatron_user, platform_user, request_data, True)
+
+    if response.get("ok"):
+        new_msg = formatting.get_pause_warning(
+            platform_user.workspace.platform_id, platform_user.platform_id
+        )
+    else:
+        new_msg = {"text": response.get("error")}
+
+    response = integration_connection.respond_to_url(request_data.response_url, new_msg)
     return response
 
 
@@ -126,17 +202,35 @@ def unpause_channel(
     megatron_user_id: int, serialized_request_data: dict, arguments: dict
 ) -> dict:
     request_data = RequestData(**serialized_request_data)
-    return _unpause_channel(megatron_user_id, request_data, arguments)
-
-
-def _unpause_channel(
-    megatron_user_id: int, request_data: RequestData, arguments: dict
-) -> dict:
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
-    platform_user = PlatformUser.objects.get(
-        platform_id=arguments["targeted_platform_id"]
+
+    workspace = CustomerWorkspace.objects.get(
+        platform_id=arguments["targeted_platform_workspace_id"]
     )
+    platform_user = WorkspaceService(workspace).get_or_create_user_by_id(
+        arguments["targeted_platform_user_id"]
+    )
+    if not platform_user:
+        return {
+            "ok": False,
+            "error": "Could not locate platform user for incoming action",
+        }
+
+    integration = megatron_user.megatronintegration_set.first()
+    integration_connection = IntegrationService(integration).get_connection(
+        as_user=False
+    )
+
     response = _change_pause_state(megatron_user, platform_user, request_data, False)
+
+    if response.get("ok"):
+        new_msg = formatting.get_unpaused_warning(
+            platform_user.workspace.platform_id, platform_user.platform_id
+        )
+    else:
+        new_msg = {"text": response.get("error")}
+
+    response = integration_connection.respond_to_url(request_data.response_url, new_msg)
     return response
 
 
@@ -146,37 +240,53 @@ def clear_context(
 ) -> dict:
     request_data = RequestData(**serialized_request_data)
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
-    platform_user_id = User.objects.get(id=arguments["platform_user_id"])
-    command_url = getattr(megatron_user, "command_url", None)
-    if not command_url:
-        return {"ok": False, "error": "MegatronUser has not provided a command url."}
-    # TODO: Use the command that called this to standardize the 'command' param
-    response = requests.post(
-        megatron_user.command_url,
-        json={
-            "command": "clear-context",
-            "platform_user_id": platform_user_id,
-            "megatron_verification_token": megatron_user.verification_token,
-        },
-    )
-    if not response.status_code == 200:
-        return {"ok": False, "error": response.content}
 
-    # TODO: This is probably better suited to being part of the integration itself
+    workspace = CustomerWorkspace.objects.get(
+        platform_id=arguments["targeted_platform_workspace_id"]
+    )
+    platform_user = WorkspaceService(workspace).get_or_create_user_by_id(
+        arguments["targeted_platform_user_id"]
+    )
+    if not platform_user:
+        return {
+            "ok": False,
+            "error": "Could not locate platform user for incoming action",
+        }
+
     integration = megatron_user.megatronintegration_set.first()
     integration_connection = IntegrationService(integration).get_connection(
         as_user=False
     )
-    platform_username = PlatformUser.objects.get(platform_id=platform_user_id).username
-    msg = {"text": f"Context cleared for *{platform_username}*."}
-    integration_response = integration_connection.ephemeral_message(request_data, msg)
 
-    if not integration_response.get("ok"):
-        return {"ok": False, "error": "Failed to post confirmation to slack."}
+    command_url = getattr(megatron_user, "command_url", None)
+    if not command_url:
+        new_msg = formatting.error_ephemeral(
+            "MegatronUser has not provided a command url.",
+            {"organization": megatron_user.organization_name},
+        )
+        integration_connection.respond_to_url(request_data.response_url, new_msg)
+        return {"ok": False, "error": "MegatronUser has not provided a command url."}
 
-    return {"ok": True}
+    response_request = requests.post(
+        megatron_user.command_url,
+        json={
+            "command": "clear-context",
+            "platform_user_id": platform_user.platform_id,
+            "megatron_verification_token": settings.MEGATRON_VERIFICATION_TOKEN,
+        },
+    )
+    if not response_request.status_code == 200:
+        new_msg = formatting.error_ephemeral(f"Request unsuccessful")
+        integration_connection.respond_to_url(request_data.response_url, new_msg)
+        return {"ok": False, "error": response_request.content}
+
+    new_msg = {"text": f"Context cleared for *{platform_user.username}*."}
+    response = integration_connection.respond_to_url(request_data.response_url, new_msg)
+
+    return response
 
 
+# TODO Clear this function and adequate it to both sync execution and return of ephemeral messages
 @shared_task
 def do(megatron_user_id: int, serialized_request_data: dict, arguments: dict) -> dict:
     request_data = RequestData(**serialized_request_data)
@@ -206,34 +316,35 @@ def do(megatron_user_id: int, serialized_request_data: dict, arguments: dict) ->
     return {"ok": True}
 
 
-@shared_task
 def _update_channel_link(
-    megatron_user_id: int, platform_user_id: str, response_url: str
+    megatron_user_id: int, platform_user: PlatformUser, response_url: str
 ):
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
     integration = megatron_user.megatronintegration_set.first()
-    connection = IntegrationService(integration).get_connection(as_user=False)
-    platform_user = PlatformUser.objects.get(platform_id=platform_user_id)
+    integration_connection = IntegrationService(integration).get_connection(
+        as_user=False
+    )
     megatron_user = MegatronUser.objects.get(id=megatron_user_id)
 
     megatron_channel = MegatronChannel.objects.filter(
-        platform_user_id=platform_user_id
+        platform_user_id=platform_user.platform_id
     ).first()
 
     if not megatron_channel:
+        integration_connection._refresh_access_token(platform_user.platform_id)
         username = platform_user.username + "_" + platform_user.workspace.domain
         username = re.sub(r"[^\w-]", "", username.lower())
-        response = connection.create_channel(f"{settings.CHANNEL_PREFIX}{username}")
+        response = integration_connection.create_channel(
+            f"{settings.CHANNEL_PREFIX}{username}"
+        )
         if not response:
-            response = connection.respond_to_url(
+            integration_connection.respond_to_url(
                 response_url, {"text": "Error creating channel."}
             )
-            if not response.get("ok"):
-                LOGGER.error(f"Problem updating slack message: {response['error']}")
             return
 
         megatron_channel, created = _create_or_update_channel(
-            megatron_user, response["channel"], platform_user
+            megatron_user, response["channel"], platform_user, username
         )
         if created:
             _get_conversation_history(megatron_channel)
@@ -246,11 +357,9 @@ def _update_channel_link(
         megatron_user, megatron_channel.platform_channel_id
     )
     join_message = formatting.user_titled(
-        platform_user_id, f"<{channel_link}|Go to slack conversation>"
+        platform_user, f"<{channel_link}|Go to slack conversation>"
     )
-    response = connection.respond_to_url(response_url, join_message)
-    if not response.get("ok"):
-        LOGGER.error(f"Problem updating slack message: {response['error']}")
+    integration_connection.respond_to_url(response_url, join_message)
 
 
 def _check_channel(platform_channel_id: str):
@@ -268,26 +377,27 @@ def _get_channel_link(megatron_user: MegatronUser, channel_id: str):
 
 
 def _create_or_update_channel(
-    megatron_user, channel_data, platform_user: PlatformUser
+    megatron_user, channel_data, platform_user: PlatformUser, username: str
 ) -> Tuple[MegatronChannel, bool]:
     workspace = platform_user.workspace
-    channel, created = MegatronChannel.objects.get_or_create(
+    channel, created = MegatronChannel.objects.update_or_create(
         megatron_user=megatron_user,
         workspace=workspace,
         platform_channel_id=channel_data["id"],
         defaults={
             "platform_user_id": platform_user.platform_id,
             "megatron_integration": (megatron_user.megatronintegration_set.first()),
+            "name": f"{settings.CHANNEL_PREFIX}{username}",
         },
     )
     return channel, created
 
 
 def _get_conversation_history(channel: MegatronChannel):
-    connection = WorkspaceService(channel.workspace).get_connection()
-    response = connection.open_im(channel.platform_user_id)
+    workspace_connection = WorkspaceService(channel.workspace).get_connection()
+    response = workspace_connection.open_im(channel.platform_user_id)
     channel_id = response["channel"]["id"]
-    prev_messages = connection.im_history(channel_id, 10)
+    prev_messages = workspace_connection.im_history(channel_id, 10)
     integration_interpreter = IntegrationService(
         channel.megatron_integration
     ).get_interpreter()
@@ -324,14 +434,14 @@ def _change_pause_state(
     megatron_user: MegatronUser,
     platform_user: PlatformUser,
     request_data: RequestData,
-    pause=False,
+    pause_state=False,
 ) -> dict:
     workspace = platform_user.workspace
     if not getattr(megatron_user, "command_url", None):
         return {"ok": False, "error": "No command url provided for workspace."}
 
-    customer_connection = WorkspaceService(workspace).get_connection(as_user=False)
-    response = customer_connection.open_im(platform_user.platform_id)
+    workspace_connection = WorkspaceService(workspace).get_connection(as_user=False)
+    response = workspace_connection.open_im(platform_user.platform_id)
     if not response["ok"]:
         return {
             "ok": False,
@@ -346,7 +456,7 @@ def _change_pause_state(
         "channel_id": channel_id,
         "platform_user_id": platform_user.platform_id,
         "team_id": workspace.platform_id,
-        "paused": pause,
+        "paused": pause_state,
     }
     response = requests.post(megatron_user.command_url, json=data)
     # TODO: This response is 200 even on failure to find user
@@ -356,38 +466,41 @@ def _change_pause_state(
     megatron_channel = MegatronChannel.objects.get(
         workspace=workspace, platform_user_id=platform_user.platform_id
     )
-    megatron_channel.is_paused = pause
+    megatron_channel.is_paused = pause_state
     megatron_channel.save()
 
     # TODO: This is probably better suited to being part of the integration itself
-    integration = megatron_user.megatronintegration_set.first()
-    integration_connection = IntegrationService(integration).get_connection(
-        as_user=False
-    )
-    paused_word = "paused" if pause else "unpaused"
-    msg = {"text": f"Bot *{paused_word}* for user: {platform_user.username}."}
-    channel = request_data.channel_id
-    message_action = Action(
-        ActionType.POST_MESSAGE, {"channel": channel, "message": msg}
-    )
-    integration_connection.take_action(message_action)
+    integration_service = IntegrationService(megatron_channel.megatron_integration)
+    integration_connection = integration_service.get_connection(as_user=False)
 
-    from_user = PlatformUser.objects.get(platform_id=request_data.user_id)
+    paused_word = "paused" if pause_state else "unpaused"
+    msg = {"text": f"Bot *{paused_word}* for user: {platform_user.username}."}
+    integration_connection.ephemeral_message(request_data, msg)
+
+    platform_agent = IntegrationService(
+        megatron_channel.megatron_integration
+    ).get_or_create_user_by_id(request_data.user_id)
+
+    if not platform_agent:
+        attach = {
+            "text": "",
+            "footer": f"executed by Teampay",
+        }
+    else:
+        attach = {
+            "text": "",
+            "footer": f"executed by {platform_agent.username} from Teampay",
+            "footer_icon": f"{platform_agent.profile_image}",
+        }
+
     paused_phrase = (
         "Hey, there! I've been paused so a support agent can talk with you. I'll let you know when I'm back online"
-        if pause
+        if pause_state
         else "Hey, there! I've been unpaused and I'm back online to help you with everything I can. "
     )
     user_msg = {
-        'text': paused_phrase,
-        'attachments': [
-            {
-                "text": "",
-                "footer": f"executed by {from_user.username} from Teampay",
-                "footer_icon": f"{from_user.profile_image}",
-            }
-        ]
+        "text": paused_phrase,
+        "attachments": [attach],
     }
-    forward_message(channel, user_msg)
-
-    return {"ok": True}
+    response = forward_message(megatron_channel.platform_channel_id, user_msg)
+    return response
