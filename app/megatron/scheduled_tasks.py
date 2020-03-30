@@ -25,9 +25,9 @@ def refresh_platform_user_data():
 def unpause_reminder():
     channels = MegatronChannel.objects.all()
     for channel in channels:
-        if not channel.is_paused:
+        if not channel.is_paused or channel.is_archived:
             continue
-        workspace_id = channel.workspace.id
+        workspace_id = channel.workspace.platform_id
         platform_user_id = channel.platform_user_id
         time_since_last_message = datetime.now() - channel.last_message_sent
         if PAUSE_WARNING_START < time_since_last_message <= PAUSE_WARNING_STOP:

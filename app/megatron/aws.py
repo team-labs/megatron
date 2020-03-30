@@ -70,6 +70,8 @@ def upload_temp_image(image: bytes, extension: str) -> Optional[str]:
     success = upload_to_s3(image, key, S3Folders.TEMP)
 
     if not success:
-        LOGGER.error(f"Error uploading the image to S3 with key: {key}")
+        LOGGER.error(
+            f"Error uploading the image to S3 with key", extra={"Key": key},
+        )
         return None
     return key

@@ -9,6 +9,7 @@ from megatron.models import (
     MegatronChannel,
     CustomerWorkspace,
     PlatformUser,
+    PlatformAgent,
 )
 
 
@@ -27,6 +28,33 @@ class IntegrationService:
         from megatron.interpreters.slack import api
 
         return api
+
+    def get_or_create_user_by_id(self, user_id: str) -> Optional[PlatformAgent]:
+        try:
+            platform_agent = PlatformAgent.objects.get(
+                platform_id=user_id, integration=self.integration
+            )
+        except PlatformAgent.DoesNotExist:
+            connection = self.get_connection()
+            action = Action(ActionType.GET_USER_INFO, {"user_id": user_id})
+            response = connection.take_action(action)
+            if response.get("ok"):
+                profile = response["user"]["profile"]
+                platform_agent = PlatformAgent.objects.create(
+                    platform_id=user_id,
+                    integration=self.integration,
+                    profile_image=profile["image_72"],
+                    username=response["user"]["name"],
+                    display_name=profile.get("display_name"),
+                    real_name=profile.get("real_name"),
+                )
+            else:
+                LOGGER.error(
+                    "Failed to obtain or create platform agent data.",
+                    extra={"platform_user_id": user_id, "error": response["error"]},
+                )
+                platform_agent = None
+        return platform_agent
 
 
 class WorkspaceService:
@@ -61,7 +89,7 @@ class WorkspaceService:
     def get_or_create_user_by_id(self, user_id: str) -> Optional[PlatformUser]:
         try:
             platform_user = PlatformUser.objects.get(
-                platform_id=user_id, workspace_id=self.workspace.id
+                platform_id=user_id, workspace=self.workspace
             )
         except PlatformUser.DoesNotExist:
             connection = self.get_connection()
@@ -71,18 +99,18 @@ class WorkspaceService:
                 profile = response["user"]["profile"]
                 platform_user = PlatformUser.objects.create(
                     platform_id=user_id,
-                    workspace_id=self.workspace.id,
+                    workspace=self.workspace,
                     profile_image=profile["image_72"],
                     username=response["user"]["name"],
                     display_name=profile.get("display_name"),
                     real_name=profile.get("real_name"),
                 )
             else:
-                LOGGER.error(
-                    "Failed to update platform user data.",
+                LOGGER.exception(
+                    "Failed to obtain or create platform user data.",
                     extra={"platform_user_id": user_id, "error": response["error"]},
                 )
-                platform_user = None
+                return None
         return platform_user
 
 
