@@ -107,7 +107,7 @@ class Token(models.Model):
 
 
 class PlatformUser(models.Model):
-    platform_id = models.CharField(db_index=True, max_length=10)
+    platform_id = models.CharField(db_index=True, max_length=12)
     workspace = models.ForeignKey(CustomerWorkspace, on_delete=models.CASCADE)
 
     # TODO: Better to keep in sync with slack or to refresh live?
@@ -131,7 +131,7 @@ class PlatformUser(models.Model):
 
 
 class PlatformAgent(models.Model):
-    platform_id = models.CharField(db_index=True, max_length=10)
+    platform_id = models.CharField(db_index=True, max_length=12)
     integration = models.ForeignKey(MegatronIntegration, on_delete=models.CASCADE)
 
     profile_image = models.CharField(max_length=250, default="")
