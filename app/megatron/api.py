@@ -223,6 +223,8 @@ def edit(request):
     params = {"new_msg": new_message, "old_msg": old_message}
     update_action = Action(ActionType.UPDATE_MESSAGE, params)
     response = integration_connection.take_action(update_action)
+    if not response.ok:
+        return response
 
     existing_message.customer_msg_id = data["message"]["ts"]
     existing_message.integration_msg_id = response["ts"]

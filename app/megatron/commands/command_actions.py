@@ -331,7 +331,6 @@ def _update_channel_link(
     ).first()
 
     if not megatron_channel:
-        integration_connection._refresh_access_token(platform_user.platform_id)
         username = platform_user.username + "_" + platform_user.workspace.domain
         username = re.sub(r"[^\w-]", "", username.lower())
         response = integration_connection.create_channel(
@@ -350,6 +349,7 @@ def _update_channel_link(
             _get_conversation_history(megatron_channel)
 
     elif megatron_channel.is_archived:
+        integration_connection._refresh_access_token(platform_user.platform_id)
         MegatronChannelService(megatron_channel).unarchive()
         _get_conversation_history(megatron_channel)
 

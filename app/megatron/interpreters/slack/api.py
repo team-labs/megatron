@@ -101,7 +101,7 @@ def slash_command(request):
     # TODO: There is only ever one megatron user, remove it
     megatron_user = MegatronUser.objects.first()
 
-    args = data["text"].split(" ")
+    args = data["text"].strip().split(" ")
     command_str = args[0]
     command = Command.get_command(command_str)
     if not command:
