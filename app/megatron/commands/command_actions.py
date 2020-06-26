@@ -450,24 +450,15 @@ def _change_pause_state(
         }
     channel_id = response["channel"]["id"]
 
-    data = {
-        "megatron_verification_token": settings.MEGATRON_VERIFICATION_TOKEN,
-        "command": "pause",
-        "channel_id": channel_id,
-        "platform_user_id": platform_user.platform_id,
-        "team_id": workspace.platform_id,
-        "paused": pause_state,
-    }
-    response = requests.post(megatron_user.command_url, json=data)
-    # TODO: This response is 200 even on failure to find user
-    if not response.status_code == 200:
-        return {"ok": False, "error": "Failed to pause bot for user."}
-
     megatron_channel = MegatronChannel.objects.get(
         workspace=workspace, platform_user_id=platform_user.platform_id
     )
-    megatron_channel.is_paused = pause_state
-    megatron_channel.save()
+    response = MegatronChannelService(megatron_channel).change_pause_state(
+        pause_state=pause_state, user_channel_id=channel_id
+    )
+
+    if not response.status_code == 200:
+        return {"ok": False, "error": "Failed to pause bot for user."}
 
     # TODO: This is probably better suited to being part of the integration itself
     integration_service = IntegrationService(megatron_channel.megatron_integration)

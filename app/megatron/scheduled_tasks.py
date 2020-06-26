@@ -46,4 +46,7 @@ def archive_channels():
         is_archived=False, last_message_sent__lte=archive_time
     )
     for channel in channels:
-        MegatronChannelService(channel).archive()
+        channel_service = MegatronChannelService(channel)
+        if channel.is_paused:
+            channel_service.change_pause_state(pause_state=False)
+        channel_service.archive()

@@ -2,6 +2,9 @@ from datetime import datetime, timezone
 import logging
 from typing import Optional
 
+import requests
+
+from megatron import settings
 from megatron.connections.slack import SlackConnection
 from megatron.connections.actions import Action, ActionType
 from megatron.models import (
@@ -139,5 +142,30 @@ class MegatronChannelService:
             self.channel.save()
         elif response["error"] == "already_archived":
             self.channel.is_archived = True
+            self.channel.save()
+        return response
+
+    def change_pause_state(self, pause_state, user_channel_id=None):
+        """
+        Send a request to the main server to change the channel pause state, besides updating the state in megatron
+        The user and bot MD channel ID is necessary, so if it's not sent a request to slack will be made to know it.
+        """
+        if not user_channel_id:
+            connection = WorkspaceService(self.channel.workspace).get_connection()
+            user_channel_id = connection.open_im(self.channel.platform_user_id)[
+                "channel"
+            ]["id"]
+        data = {
+            "megatron_verification_token": settings.MEGATRON_VERIFICATION_TOKEN,
+            "command": "pause",
+            "channel_id": user_channel_id,
+            "team_id": self.channel.workspace.platform_id,
+            "paused": pause_state,
+        }
+
+        response = requests.post(self.channel.megatron_user.command_url, json=data)
+        # TODO: This response is 200 even on failure to find user
+        if response.status_code == 200:
+            self.channel.is_paused = pause_state
             self.channel.save()
         return response
