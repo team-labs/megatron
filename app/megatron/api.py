@@ -207,6 +207,8 @@ def edit(request):
         )
     except (MegatronChannel.DoesNotExist, MegatronMessage.DoesNotExist):
         return OK_RESPONSE
+    if megatron_channel.is_archived:
+        return OK_RESPONSE
 
     integration_connection = IntegrationService(
         megatron_channel.megatron_integration
@@ -223,7 +225,7 @@ def edit(request):
     params = {"new_msg": new_message, "old_msg": old_message}
     update_action = Action(ActionType.UPDATE_MESSAGE, params)
     response = integration_connection.take_action(update_action)
-    if not response.ok:
+    if not response.get("ok"):
         return response
 
     existing_message.customer_msg_id = data["message"]["ts"]
