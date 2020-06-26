@@ -53,6 +53,7 @@ PyJWT = "==1.6.4"
 awscli = "*"
 boto3 = "*"
 gunicorn = "*"
+freezegun = "*"
 
 [requires]
 python_version = "3.6"
