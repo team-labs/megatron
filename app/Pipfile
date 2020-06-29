@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 factory-boy = "*"
 black = "*"
+freezegun = "*"
 
 [packages]
 amqp = "==2.3.2"
@@ -18,8 +19,9 @@ chardet = "==3.0.4"
 defusedxml = "==0.5.0"
 dj-database-url = "==0.5.0"
 django-rest-framework = "==0.1.0"
-django-timezone-field = "==3.0"
 djangorestframework = "==3.9.1"
+django = {extras = ["bcrypt"],version = "==2.2.13"}
+django-celery-beat = "*"
 docutils = "==0.14"
 idna = "==2.7"
 jmespath = "==0.9.3"
@@ -46,14 +48,11 @@ social-auth-core = "==1.7.0"
 typed-ast = "==1.1.0"
 urllib3 = ">=1.24.2"
 vine = "==1.1.4"
-Django = ">=2.1.11"
-django_celery_beat = "==1.4.0"
 mypy_extensions = "==0.4.1"
 PyJWT = "==1.6.4"
 awscli = "*"
 boto3 = "*"
 gunicorn = "*"
-freezegun = "*"
 
 [requires]
 python_version = "3.6"
