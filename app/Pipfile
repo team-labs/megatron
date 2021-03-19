@@ -19,7 +19,7 @@ chardet = "==3.0.4"
 defusedxml = "==0.5.0"
 dj-database-url = "==0.5.0"
 django-rest-framework = "==0.1.0"
-djangorestframework = "==3.9.1"
+djangorestframework = "==3.11.2"
 django = {extras = ["bcrypt"],version = "==2.2.13"}
 django-celery-beat = "*"
 docutils = "==0.14"
