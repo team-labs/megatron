@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0d5fcbb53f44b2965801c39407dc05a28be6629542420b582e1b0015de56143c"
+            "sha256": "d990586b0e70978cf6ef727f7e52168af1baf8578602304a4d50cbbcdfc27adb"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -190,11 +190,11 @@
                 "bcrypt"
             ],
             "hashes": [
-                "sha256:0eaca08f236bf502a9773e53623f766cc3ceee6453cc41e6de1c8b80f07d2364",
-                "sha256:c9c994f5e0a032cbd45089798b52e4080f4dea7241c58e3e0636c54146480bb4"
+                "sha256:2484f115891ab1a0e9ae153602a641fbc15d7894c036d79fb78662c0965d7954",
+                "sha256:2569f9dc5f8e458a5e988b03d6b7a02bda59b006d6782f4ea0fd590ed7336a64"
             ],
             "index": "pypi",
-            "version": "==2.2.18"
+            "version": "==2.2.20"
         },
         "django-celery-beat": {
             "hashes": [
