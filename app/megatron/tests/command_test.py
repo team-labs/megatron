@@ -8,6 +8,7 @@ from megatron.models import (
     MegatronIntegration,
     CustomerWorkspace,
     PlatformUser,
+    PlatformAgent,
 )
 
 
@@ -26,6 +27,17 @@ def fake_platform_user():
 
 
 @pytest.fixture(autouse=True)
+def fake_platform_agent():
+    user = PlatformAgent.objects.create(
+        platform_id=54321,
+        integration=MegatronIntegration.objects.first(),
+        profile_image="no.co",
+        username="fakeagent",
+    )
+    return user
+
+
+@pytest.fixture(autouse=True)
 def fake_channel(fake_platform_user):
     channel = MegatronChannel.objects.create(
         megatron_user=MegatronUser.objects.first(),
@@ -39,27 +51,23 @@ def fake_channel(fake_platform_user):
 
 
 @pytest.fixture(autouse=True)
-def fake_request_data(fake_channel):
+def fake_request_data(fake_channel, fake_platform_agent):
     return {
         "channel_id": fake_channel.platform_channel_id,
-        "user_id": fake_channel.platform_user_id,
+        "user_id": fake_platform_agent.platform_id,
         "response_url": "totally.fake.co",
     }
 
 
 @pytest.fixture
 def fake_arguments(fake_platform_user):
-    return {"targeted_platform_id": fake_platform_user.platform_id}
+    return {
+        "targeted_platform_user_id": fake_platform_user.platform_id,
+        "targeted_platform_workspace_id": fake_platform_user.workspace.platform_id,
+    }
 
 
 class TestOpenChannel(object):
-    @staticmethod
-    @pytest.fixture(autouse=True)
-    def no_delay_update():
-        command_actions._update_channel_link.delay = (
-            command_actions._update_channel_link
-        )
-
     def test_open_channel_creates_channel(self, fake_request_data, fake_arguments):
         megatron_user = MegatronUser.objects.first()
         response = command_actions.open_channel(

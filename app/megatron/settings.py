@@ -43,11 +43,6 @@ LOAD_BALANCER_HOST = "load-balancing.teampay.co"
 ALLOWED_HOSTS = {FORMATTED_HOSTNAME, LOAD_BALANCER_HOST, "0.0.0.0", "localhost"}
 
 # ==================== Logging ========================
-FRONT_TOKEN = None
-FRONT_CHANNEL = None
-if MEGATRON_APP_MODE != "megatron-dev":
-    FRONT_TOKEN = os.environ.get("FRONT_TOKEN")
-
 import dj_database_url  # noqa
 
 DATABASES = {"default": dj_database_url.config()}
@@ -58,6 +53,7 @@ AWS_SECRET_KEY = os.environ["S3_AWS_SECRET_ACCESS_KEY"]
 AWS_S3_BUCKET = os.environ["AWS_S3_BUCKET"]
 
 
+# ==================== Channels ========================
 NOTIFICATIONS_CHANNELS = {
     NotificationChannels.notifications: os.environ.get(
         "NOTIFICATIONS_CHANNEL", "#notifications"

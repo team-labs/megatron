@@ -9,7 +9,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from megatron import front_integration
 from megatron.connections.actions import ActionType, Action
 from megatron.statics import RequestData, NotificationChannels
 from megatron.responses import MegatronResponse, OK_RESPONSE
@@ -43,7 +42,6 @@ def incoming(request) -> MegatronResponse:
     if response.get("ok"):
 
         if response.get("watched_channel"):
-            front_integration.incoming_message.delay(msg)
             channel = MegatronChannel.objects.filter(
                 platform_user_id=request.data["message"]["user"]
             ).first()
@@ -75,13 +73,9 @@ def outgoing(request) -> MegatronResponse:
 
     megatron_integration = megatron_channel.megatron_integration
     interpreter = IntegrationService(megatron_integration).get_interpreter()
-    customer_workspace_id = megatron_channel.workspace.platform_id
     response = interpreter.outgoing(message, megatron_channel)
     if response.get("ok"):
         if response.get("watched_channel"):
-            front_integration.outgoing_message.delay(
-                user_id, customer_workspace_id, message
-            )
             megatron_msg = MegatronMessage(
                 integration_msg_id=response["ts"],
                 customer_msg_id=request.data["ts"],
@@ -192,52 +186,49 @@ def message(request, user_id) -> MegatronResponse:
 @api_view(http_method_names=["POST"])
 @permission_classes((IsAuthenticated,))
 def edit(request):
-    message = json.loads(request.body)
-    # Warning! Currently the only way to identify msgs sent by Megatron
-    try:
-        footer_text = message["message"]["attachments"][-1]["footer"]
-        if footer_text.startswith("sent by"):
-            return OK_RESPONSE
-    except KeyError:
-        pass
+    data = json.loads(request.body)
 
-    if message.get("user"):
-        megatron_channel = MegatronChannel.objects.filter(
-            platform_user_id=message["message"]["user"]
-        ).first()
-    elif message.get("channel"):
-        megatron_channel = MegatronChannel.objects.filter(
-            platform_channel_id=message["channel"]
-        ).first()
-    else:
+    if "bot_id" in data["message"]:
+        # Warning! Currently the only way to identify msgs sent by Megatron against the regular bot
+        try:
+            footer_text = data["message"]["attachments"][-1]["footer"]
+            if footer_text.startswith("sent by"):
+                return OK_RESPONSE
+        except KeyError:
+            pass
+
+    try:
+        megatron_channel = MegatronChannel.objects.get(
+            platform_user_id=data["message"]["user"]
+        )
+        existing_message = MegatronMessage.objects.get(
+            customer_msg_id=data["previous_message"]["ts"],
+            megatron_channel=megatron_channel,
+        )
+    except (MegatronChannel.DoesNotExist, MegatronMessage.DoesNotExist):
         return OK_RESPONSE
-    if not megatron_channel:
+    if megatron_channel.is_archived:
         return OK_RESPONSE
-    team_connection = IntegrationService(
+
+    integration_connection = IntegrationService(
         megatron_channel.megatron_integration
     ).get_connection(as_user=False)
 
-    existing_message = MegatronMessage.objects.filter(
-        customer_msg_id=message["previous_message"]["ts"],
-        megatron_channel=megatron_channel,
-    ).first()
-
-    if not megatron_channel or not existing_message:
-        return OK_RESPONSE
-
     new_message = {
-        "text": message["message"].get("text", ""),
-        "attachments": message["message"].get("attachments"),
+        "text": data["message"].get("text", ""),
+        "attachments": data["message"].get("attachments"),
     }
     old_message = {
         "channel_id": megatron_channel.platform_channel_id,
         "ts": existing_message.integration_msg_id,
     }
-    params = {"new_message": new_message, "old_message": old_message}
+    params = {"new_msg": new_message, "old_msg": old_message}
     update_action = Action(ActionType.UPDATE_MESSAGE, params)
-    response = team_connection.take_action(update_action)
+    response = integration_connection.take_action(update_action)
+    if not response.get("ok"):
+        return response
 
-    existing_message.customer_msg_id = message["message"]["ts"]
+    existing_message.customer_msg_id = data["message"]["ts"]
     existing_message.integration_msg_id = response["ts"]
     existing_message.save()
 
