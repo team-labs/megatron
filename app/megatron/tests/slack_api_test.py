@@ -87,7 +87,7 @@ class TestInteractiveMessage(object):
         payload = {
             "type": "interactive_message",
             "actions": [
-                {"type": "select", "selected_options": [{"value": "9876-12345"}],}
+                {"type": "select", "selected_options": [{"value": "9876-12345"}]}
             ],
             "callback_id": "",
             "team": {"id": "12345"},

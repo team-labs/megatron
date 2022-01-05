@@ -200,7 +200,7 @@ def event(request):
 
     try:
         MegatronMessage.objects.create(
-            megatron_channel=tracked_channel, integration_msg_id=event["event_ts"],
+            megatron_channel=tracked_channel, integration_msg_id=event["event_ts"]
         )
     except IntegrityError:
         LOGGER.warning("Discarding duplicate event.", extra={"received_msg": data})
@@ -238,10 +238,7 @@ def event(request):
             new_message = workspace_connection.add_forward_footer(
                 new_message, from_user
             )
-            old_message = {
-                "channel_id": customer_channel_id,
-                "ts": customer_ts,
-            }
+            old_message = {"channel_id": customer_channel_id, "ts": customer_ts}
             params = {"new_msg": new_message, "old_msg": old_message}
 
             update_action = Action(ActionType.UPDATE_MESSAGE, params)
