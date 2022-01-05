@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 factory-boy = "*"
-black = "*"
+black = "==19.3b0"
 freezegun = "*"
 
 [packages]
