@@ -48,7 +48,7 @@ def open_channel(
     except CustomerWorkspace.DoesNotExist:
         new_msg = formatting.error_ephemeral(
             "Customer Workspace not found for user:",
-            {"user_id": platform_user_id, "workspace_id": platform_workspace_id,},
+            {"user_id": platform_user_id, "workspace_id": platform_workspace_id},
         )
         integration_connection.respond_to_url(request_data.response_url, new_msg)
         return {"ok": False, "error": "Customer Workspace not found"}
@@ -473,10 +473,7 @@ def _change_pause_state(
     ).get_or_create_user_by_id(request_data.user_id)
 
     if not platform_agent:
-        attach = {
-            "text": "",
-            "footer": f"executed by Teampay",
-        }
+        attach = {"text": "", "footer": f"executed by Teampay"}
     else:
         attach = {
             "text": "",
@@ -489,9 +486,6 @@ def _change_pause_state(
         if pause_state
         else "Hey, there! I've been unpaused and I'm back online to help you with everything I can. "
     )
-    user_msg = {
-        "text": paused_phrase,
-        "attachments": [attach],
-    }
+    user_msg = {"text": paused_phrase, "attachments": [attach]}
     response = forward_message(megatron_channel.platform_channel_id, user_msg)
     return response

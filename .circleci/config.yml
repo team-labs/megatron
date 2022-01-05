@@ -32,6 +32,11 @@ jobs:
                 cd app
                 pipenv run mypy --ignore-missing-imports --follow-imports=skip .
       - run:
+            name: black
+            command: |
+                cd app
+                pipenv run black . --check --exclude "/(\.git|\.mypy_cache|\.nox|\.tox|\.venv|migrations)/"
+      - run:
           name: Pytest
           command: |
             # pytest doesn't like to be run from outside app
