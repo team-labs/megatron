@@ -2,8 +2,9 @@ import os
 import re
 from megatron.statics import NotificationChannels
 
-DEBUG = True
-SECRET_KEY = "4l0ngs3cr3tstr1ngw3lln0ts0lj0ngw41tn0w1tsl0ng3n0ugh"
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ["MEGATRON_DJANGO_SECRET"]
+
 ROOT_URLCONF = "megatron.urls"
 CHANNEL_PREFIX = os.environ["CHANNEL_PREFIX"]
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,7 +16,9 @@ INSTALLED_APPS = [
     "megatron",
 ]
 
-MEGATRON_APP_MODE = os.environ.get("MEGATRON_APP_MODE", "dev")
+# Format: `megatron-ENVIRONMENT`
+MEGATRON_APP_MODE = os.environ["MEGATRON_APP_MODE"]
+DEBUG = MEGATRON_APP_MODE == "megatron-dev"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 STATIC_URL = "/static/"
