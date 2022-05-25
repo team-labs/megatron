@@ -12,20 +12,11 @@ jobs:
           command: |
             sudo pip install awscli pipenv
             curl -sL https://sentry.io/get-cli/ | bash
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "app/Pipfile.lock" }}
-            - cache
       - run:
           name: Install Python Dependencies
           command: |
             cd app
             pipenv sync --dev
-      - save_cache:
-          key: cache-{{ checksum "app/Pipfile.lock" }}
-          paths:
-            - ~/.local
-            - ~/.cache
       - run:
             name: mypy
             command: |
