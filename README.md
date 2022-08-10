@@ -1,6 +1,6 @@
 Megatron
 ========
-# NOTE: THIS REPO HAS BEEN ARCHIVED AS OF 2002-08-10
+# NOTE: THIS REPO HAS BEEN ARCHIVED
 
 ![](https://cdn-images-1.medium.com/max/1600/1*P50kQIe-ahc05ZPTGTSdvQ.png "Logo Title Text 1")
 
